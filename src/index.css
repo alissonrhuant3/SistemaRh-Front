@@ -1,0 +1,110 @@
+body {
+  font-family: Roboto, sans-serif;
+}
+
+.text-blue {
+  color: #0d6efd;
+}
+
+.trigger {
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 64px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+.logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, .2);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-layout-sider{
+  flex: 0 0 250px !important;
+  max-width: 250px !important;
+  min-width: 250px !important;
+  width: 250px !important;
+}
+
+.ant-layout-sider-collapsed {
+  flex: 0 0 80px !important;
+  max-width: 80px !important;
+  min-width: 80px !important;
+  width: 80px !important;
+}
+
+.sm-logo {
+  display: none;
+}
+
+.ant-layout-sider-collapsed .sm-logo {
+  display: block;
+}
+
+.ant-layout-sider-collapsed .lg-logo {
+  display: none;
+}
+
+.logo {
+  background-color: #ffd333;
+  margin: 0;
+  height: 64px;
+}
+
+main {
+  overflow-y: hidden;
+}
+
+/***** Listagem Empresas *****/  
+.list-empresas .iconsearch {
+  cursor: pointer;
+}
+
+.inputFiltro {
+  height: 24px;
+  border-radius: 4px;
+}
+
+.inputFiltro:focus {
+ box-shadow: 0 0 0 0;
+ outline: 0;
+}
+
+.custom-table-row.ant-table-row-selected > .ant-table-cell{
+  background-color: #ba80f0 !important;
+}
+
+.formInput {
+  height: 55px !important;
+}
+
+.ant-modal-title {
+  text-align: center;
+  font-size: 30px !important;
+  margin-bottom: 30px !important;
+}
+
+.ant-btn {
+  padding: 18px 23px !important;
+  font-size: 18px !important;
+}
+
+.ant-modal-content {
+  bottom: 83px;
+}
+
+.ant-modal-wrap {
+  overflow: hidden !important;
+}
+
+
+/***** Fim Listagem Empresas *****/

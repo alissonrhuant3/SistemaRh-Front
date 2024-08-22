@@ -5,6 +5,8 @@ import { FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { HiViewGridAdd } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 
 const columns = [
   {
@@ -32,32 +34,18 @@ const columns = [
     dataIndex: "acoes",
   },
 ];
-const data1 = [];
-for (let i = 0; i < 25; i++) {
-  data1.push({
-    key: i + 1,
-    nome: `Alisson Rhuan`,
-    cpf: "081.013.301-60",
-    telefone: `58445484`,
-    empresa: "Alisson LTDA",
-    acoes: (
-      <>
-        <button className="bg-transparent border-0 text-blue">
-          <GrFormView className="fs-4" />
-        </button>
-        <button className="bg-transparent border-0 text-danger">
-          <AiFillDelete className="fs-5" />
-        </button>
-      </>
-    ),
-  });
-}
 
 const ListagemFuncionarios = () => {
   const [open, setOpen] = useState(false);
+  const [openAssoc, setOpenAssoc] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [confirmLoadingAssoc, setConfirmLoadingAssoc] = useState(false);
+  const navigate = useNavigate();
   const showModal = () => {
     setOpen(true);
+  };
+  const showModalAssoc = () => {
+    setOpenAssoc(true);
   };
   const handleOk = () => {
     alert("O Augusto quer ser Homem");
@@ -71,6 +59,47 @@ const ListagemFuncionarios = () => {
     console.log("Clicked cancel button");
     setOpen(false);
   };
+  const handleOkAssoc = () => {
+    alert("O Augusto quer ser Homem");
+    setConfirmLoadingAssoc(true);
+    setTimeout(() => {
+      setOpenAssoc(false);
+      setConfirmLoadingAssoc(false);
+    }, 2000);
+  };
+  const handleCancelAssoc = () => {
+    console.log("Clicked cancel button");
+    setOpenAssoc(false);
+  };
+  const apontamentos = (e) => {
+    navigate(`apontamentos/${e.key}`)
+  }
+  const data1 = [];
+  for (let i = 0; i < 25; i++) {
+    data1.push({
+      key: i + 1,
+      nome: `Alisson Rhuan`,
+      cpf: "081.013.301-60",
+      telefone: `58445484`,
+      empresa: "Alisson LTDA",
+      acoes: (
+        <>
+          <button className="bg-transparent border-0 text-blue">
+            <GrFormView className="fs-4" />
+          </button>
+          <button
+            className="bg-transparent border-0 text-blue"
+            onClick={showModalAssoc}
+          >
+            <HiViewGridAdd className="fs-5" />
+          </button>
+          <button className="bg-transparent border-0 text-danger">
+            <AiFillDelete className="fs-5" />
+          </button>
+        </>
+      ),
+    });
+  }
 
   return (
     <div className="list-empresas">
@@ -112,7 +141,7 @@ const ListagemFuncionarios = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
-                console.log(record);
+                apontamentos(record)
               },
             };
           }}
@@ -418,12 +447,90 @@ const ListagemFuncionarios = () => {
                   class="form-control"
                   placeholder="Insira as Observações"
                   id="observacoes"
-                  style={{"height": "100px", "resize": "none"}}
+                  style={{ height: "100px", resize: "none" }}
                 ></textarea>
                 <label for="observacoes">Observações</label>
               </div>
             </div>
           </form>
+        </Modal>
+        <Modal
+          title="Associação"
+          onCancel={handleCancelAssoc}
+          open={openAssoc}
+          onOk={handleOkAssoc}
+          confirmLoading={confirmLoadingAssoc}
+          maskClosable={false}
+          width={"60%"}
+        >
+          <div className="container-xxl">
+            <div className="tabelaAssoc_linhas w-100 ">
+              <div className="d-flex">
+                <div className="linha">
+                  <h5 className="fs-5 me-2">Funcionário</h5>
+                </div>
+                <div className="w-100">
+                  <h5 className="text-center">Manuel da Silva</h5>
+                </div>
+              </div>
+            </div>
+            <br />
+            <div className="tabelaAssoc_linhas w-100 ">
+                <div className="d-flex">
+                  <div className="linha">
+                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
+                  </div>
+                  <div className="w-75">
+                    <h6 className="text-projetos">Apostas esportivas</h6>
+                  </div>
+                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                </div>
+            </div>
+            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
+                <div className="d-flex">
+                  <div className="linha">
+                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
+                  </div>
+                  <div className="w-75">
+                    <h6 className="text-projetos">Nota Fiscal Eletrônica</h6>
+                  </div>
+                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                </div>
+            </div>
+            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
+                <div className="d-flex">
+                  <div className="linha">
+                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
+                  </div>
+                  <div className="w-75">
+                    <h6 className="text-projetos">Ecommerce</h6>
+                  </div>
+                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                </div>
+            </div>
+            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
+                <div className="d-flex">
+                  <div className="linha">
+                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
+                  </div>
+                  <div className="w-75">
+                    <h6 className="text-projetos">Streaming</h6>
+                  </div>
+                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                </div>
+            </div>
+            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
+                <div className="d-flex">
+                  <div className="linha">
+                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
+                  </div>
+                  <div className="w-75">
+                    <h6 className="text-projetos">Ponto Eletrônico</h6>
+                  </div>
+                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                </div>
+            </div>
+          </div>
         </Modal>
       </div>
     </div>

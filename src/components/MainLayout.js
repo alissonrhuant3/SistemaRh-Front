@@ -5,6 +5,8 @@ import {
   AiOutlineDashboard,
   AiOutlineUser,
 } from "react-icons/ai";
+import { BsFillPersonPlusFill } from "react-icons/bs";
+
 import { FaRegBuilding } from "react-icons/fa";
 import { Outlet, useNavigate } from "react-router-dom";
 import { FaClipboardList } from "react-icons/fa";
@@ -38,7 +40,7 @@ const MainLayout = () => {
             {
               key: "",
               icon: <AiOutlineDashboard className="fs-4" />,
-              label: "Dashboard",
+              label: "Inicio",
             },
             {
               key: "empresas",
@@ -51,9 +53,14 @@ const MainLayout = () => {
               label: "Funcionários",
             },
             {
-              key: "projects",
+              key: "projetos",
               icon: <FaClipboardList className="fs-4" />,
               label: "Projetos",
+            },
+            {
+              key: "apontamentos",
+              icon: <BsFillPersonPlusFill className="fs-4" />,
+              label: "Apontamentos",
             },
           ]}
         />

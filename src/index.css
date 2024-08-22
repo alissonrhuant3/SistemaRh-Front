@@ -108,3 +108,40 @@ main {
 
 
 /***** Fim Listagem Empresas *****/
+
+/***** Listagem Funcionários *****/ 
+.tabelaAssoc_linhas {
+  border: 1px solid rgb(0, 0, 0);
+}
+
+.tabelaAssoc_linhas_titulo {
+  height: 32px;
+}
+
+.linha {
+  border-right: 1px solid black;
+}
+
+.text-projetos {
+  margin-top: 5px;
+  text-align: center;
+  color: rgb(65, 64, 64);
+  font-size: 18px;
+}
+ 
+/***** End Listagem Funcionários *****/
+
+/***** ApontamentosFuncionario *****/ 
+.apontamentosTitle {
+  font-size: 25px;
+  margin: 2px;
+  font-weight: 600;
+}
+
+.apontamentosFuncionario {
+  font-size: 23px;
+  margin: 2px;
+  font-weight: 400;
+}
+/***** End ApontamentosFuncionario *****/
+

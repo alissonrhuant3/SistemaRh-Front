@@ -64,6 +64,102 @@ main {
   overflow-y: hidden;
 }
 
+/***** Inicio *****/ 
+.inicio {
+  background-color: hsl(0, 0%, 92%);
+}
+
+.clock {
+  margin-top: 20px !important;
+}
+
+.clock__space-button {
+  display: flex;
+  justify-content: center;
+  max-width: 520px;
+}
+
+.clock__button {
+  display: flex;
+  align-items: center;
+  background-color: #3B3A3A;
+  width: 250px;
+  height: 18px;
+  border-radius: 20px 20px 0px 0px;
+}
+
+.clock__display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #3B3A3A;
+  height: 200px;
+  width: 400px;
+  border-radius: 30px;
+  border-width: 200px;
+  border: 10px solid white;
+}
+
+.display__date h1 {
+  margin-top: 20px;
+  font-size: 45px;
+  color: #27FFEC; 
+  font-family: 'DS-Digital', sans-serif;                                           
+}
+
+.display__date p#dia {
+  text-align: center;
+  font-size: medium;
+  text-transform: uppercase;
+  color: white;
+  height: 2px;
+}
+
+.display__hours h1 {
+  font-size: 92px;
+  color: #27FFEC; 
+  font-family: 'DS-Digital', sans-serif;                                           
+}
+
+.clock__supports {
+  display: flex;
+  justify-content: space-around;
+  max-width: 520px;
+  background-color: #59AACC;
+  height: 30px;
+  border-radius: 50%
+}
+
+
+.clock__supports .support {
+  background-color: #3B3A3A;
+  width: 60px;
+  height: 10px;
+  border-radius: 0px 0px 10px 10px;
+}
+
+.clock__customer {
+  margin-top: 7px;
+  flex-direction: column;
+  align-items: center;
+}
+.clock__customer p {
+  font-weight: 400;
+  font-size: 18px;
+  margin-left: 5px;
+  height: 20px;
+}
+
+.clock__customer p#enterprise {
+  
+}
+
+.clock__customer p#role {
+  font-weight: 500;
+}
+/***** End Inicio *****/
+
 /***** Listagem Empresas *****/  
 .list-empresas .iconsearch {
   cursor: pointer;
@@ -142,6 +238,21 @@ main {
   font-size: 23px;
   margin: 2px;
   font-weight: 400;
+}
+
+.ant-table-wrapper .ant-table-thead >tr>th {
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+.ant-table-wrapper .ant-table-container table>thead>tr:first-child >*:last-child {
+  border-start-end-radius: 0 !important;
+}
+.ant-table-wrapper .ant-table-tbody >tr >td {
+border-color: black;
+border-right: 0.1px solid black;
+}
+.ant-table-wrapper .ant-table-tbody >tr >td:nth-child(12) {
+border-right: 0.0px solid rgb(0, 0, 0);
 }
 /***** End ApontamentosFuncionario *****/
 

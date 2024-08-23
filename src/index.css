@@ -240,18 +240,21 @@ main {
   font-weight: 400;
 }
 
-.ant-table-wrapper .ant-table-thead >tr>th {
+.tabelaApontamentos.ant-table-wrapper .ant-table-thead >tr>th {
   border-bottom: 1px solid black;
   border-right: 1px solid black;
 }
-.ant-table-wrapper .ant-table-container table>thead>tr:first-child >*:last-child {
+.tabelaApontamentos.ant-table-wrapper .ant-table-thead >tr>th:nth-child(12) {
+  border-right: 0px solid black;
+}
+.tabelaApontamentos.ant-table-wrapper .ant-table-container table>thead>tr:first-child >*:last-child {
   border-start-end-radius: 0 !important;
 }
-.ant-table-wrapper .ant-table-tbody >tr >td {
+.tabelaApontamentos.ant-table-wrapper .ant-table-tbody >tr >td {
 border-color: black;
 border-right: 0.1px solid black;
 }
-.ant-table-wrapper .ant-table-tbody >tr >td:nth-child(12) {
+.tabelaApontamentos.ant-table-wrapper .ant-table-tbody >tr >td:nth-child(12) {
 border-right: 0.0px solid rgb(0, 0, 0);
 }
 /***** End ApontamentosFuncionario *****/

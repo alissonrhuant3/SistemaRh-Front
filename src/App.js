@@ -7,13 +7,15 @@ import ListagemEmpresas from "./pages/ListagemEmpresas";
 import ListagemFuncionarios from "./pages/ListagemFuncionarios";
 import ListagemProjetos from "./pages/ListagemProjetos";
 import Apontamentos from "./pages/Apontamentos";
+import { PrivateRoutes } from "./routing/PrivateRoutes";
 
 function App() {
+  
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/admin" element={<MainLayout />}>
+        <Route path="/admin" element={<PrivateRoutes><MainLayout /></PrivateRoutes>}>
           <Route index element={<Dashboard />}/>
           <Route path="empresas" element={<ListagemEmpresas />}/>
           <Route path="funcionarios" element={<ListagemFuncionarios />}/>

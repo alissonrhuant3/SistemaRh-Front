@@ -3,16 +3,25 @@ import { FaRegBuilding } from "react-icons/fa";
 import { AiOutlineUser } from "react-icons/ai";
 import moment from "moment";
 import "moment/locale/pt-br";
+import { verifyExpJwtToken } from "../utils/axiosconfig";
 
 const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState("00:00:00");
+  if(verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/")
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/")
+  }
+  
+  useEffect(() => {
+    
+  },[])
 
   useEffect(() => {
     setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
   }, []);
-  console.log(currentTime);
 
   return (
     <>

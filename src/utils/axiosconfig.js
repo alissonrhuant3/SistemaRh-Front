@@ -1,6 +1,10 @@
 import { jwtDecode } from "jwt-decode";
 const moment = require("moment");
 
+const getTokenFromLocalStorage = localStorage.getItem("token")
+  ? localStorage.getItem("token")
+  : null;
+
 export const verifyExpJwtToken = () => {
   const token = localStorage.getItem("token");
   let decoded = "";
@@ -17,4 +21,12 @@ export const verifyExpJwtToken = () => {
     }
   }
   return "Usuário não logado";
+};
+
+export const config = {
+  headers: {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage !== null ? getTokenFromLocalStorage : ""
+    }`,
+  },
 };

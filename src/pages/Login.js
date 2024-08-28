@@ -5,14 +5,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { login } from "../features/auth/authSlice";
 import * as Yup from "yup";
-
+import { IMaskInput } from "react-imask";
 
 const Login = () => {
   const dispatch = useDispatch();
   let schema = Yup.object().shape({
-    cpf: Yup.number().required("Cpf é Requerido!"),
+    cpf: Yup.string().required("Cpf é Requerido!"),
     password: Yup.string().required("Senha é Requerido!"),
   });
+ 
   const formik = useFormik({
     initialValues: {
       cpf: "",
@@ -20,6 +21,7 @@ const Login = () => {
     },
     validationSchema: schema,
     onSubmit: (values) => {
+      alert(JSON.stringify(values))
       dispatch(login(values));
     },
   });
@@ -51,15 +53,18 @@ const Login = () => {
         <h3 className="text-center">Entrar</h3>
         <p className="text-center">Entre em sua conta para continuar</p>
         <form action="" onSubmit={formik.handleSubmit}>
-          <CustomInput
-            type="number"
+          <div className="form-floating">
+          <IMaskInput className="form-control"
+          type="text"
             label="Cpf"
             id="cpf"
             name="cpf"
-            val={formik.values.cpf}
-            onCh={formik.handleChange("cpf")}
-            onBl={formik.handleBlur("cpf")}
+            value={formik.values.cpf}
+            onChange={formik.handleChange("cpf")}
+            onBlur={formik.handleBlur("cpf")}
           />
+          <label htmlFor="cpf">CPF|EMAIL</label>
+          </div>
           <div className="error text-danger mb-3 ms-1">
             {formik.touched.cpf && formik.errors.cpf ? (
               <div>{formik.errors.cpf}</div>

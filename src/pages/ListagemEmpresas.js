@@ -1,15 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Modal } from "antd";
 import { AiFillDelete } from "react-icons/ai";
 import { FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
+import { useDispatch, useSelector } from "react-redux";
+import { getEmpresas } from "../features/empresas/empresaSlice";
 
 const columns = [
-  {
-    title: "N/S",
-    dataIndex: "key",
-  },
   {
     title: "CNPJ",
     dataIndex: "cnpj",
@@ -27,35 +25,29 @@ const columns = [
     dataIndex: "nomerespo",
   },
   {
+    title: "Cidade",
+    dataIndex: "cidade",
+  },
+  {
+    title: "UF",
+    dataIndex: "uf",
+  },
+  {
     title: "Ações",
     dataIndex: "acoes",
   },
 ];
-const data1 = [];
-for (let i = 0; i < 25; i++) {
-  data1.push({
-    key: i + 1,
-    cnpj: `5484818488848`,
-    razaosocial: "Empresa LTDA",
-    telefone: `58445484`,
-    nomerespo: "Alisson",
-    teste: "testando",
-    acoes: (
-      <>
-        <button className="bg-transparent border-0 text-blue">
-          <GrFormView className="fs-4" />
-        </button>
-        <button className="bg-transparent border-0 text-danger">
-          <AiFillDelete className="fs-5" />
-        </button>
-      </>
-    ),
-  });
-}
+
 
 const ListagemEmpresas = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [activeRecord, setActiveRecord] = useState(null);
+  const [disabledInputs, setDisabledInputs] = useState(false);
+  console.log(activeRecord);
+  
+  const dispatch = useDispatch();
+  const getEmpresaState = useSelector((state) => state.empresa.empresas)
   const showModal = () => {
     setOpen(true);
   };
@@ -68,9 +60,45 @@ const ListagemEmpresas = () => {
     }, 2000);
   };
   const handleCancel = () => {
-    console.log("Clicked cancel button");
+    setActiveRecord(null);
+    setDisabledInputs(false);
     setOpen(false);
   };
+
+  useEffect(() => {
+    dispatch(getEmpresas())
+  },[])
+
+  const data1 = [];
+  for (let i = 0; i < getEmpresaState?.length; i++) {
+  data1.push({
+    key: i + 1,
+    cnpj: getEmpresaState[i]?.cnpj,
+    razaosocial: getEmpresaState[i]?.razaosocial,
+    inscricaoestadual: getEmpresaState[i]?.inscricaoestadual,
+    endereco: getEmpresaState[i]?.endereco,
+    complemento: getEmpresaState[i]?.complemento,
+    bairro: getEmpresaState[i]?.bairro,
+    cep: getEmpresaState[i]?.cep,
+    cidade: getEmpresaState[i]?.cidade,
+    uf: getEmpresaState[i]?.uf,
+    telefone: getEmpresaState[i]?.telefone,
+    nomerespo: getEmpresaState[i]?.nomeresponsavel,
+    emailresponsavel: getEmpresaState[i]?.emailresponsavel,
+    telefoneresponsavel: getEmpresaState[i]?.telefoneresponsavel,
+    id: getEmpresaState[i]?._id,
+    acoes: (
+      <>
+        <button className="bg-transparent border-0 text-blue">
+          <GrFormView className="fs-4" />
+        </button>
+        <button className="bg-transparent border-0 text-danger">
+          <AiFillDelete className="fs-5" />
+        </button>
+      </>
+    ),
+  });
+}
 
   return (
     <div className="list-empresas">
@@ -112,7 +140,9 @@ const ListagemEmpresas = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
-                console.log(record);
+                setOpen(true);
+                setActiveRecord(record);
+                setDisabledInputs(true);
               },
             };
           }}
@@ -121,7 +151,7 @@ const ListagemEmpresas = () => {
           rowClassName="custom-table-row"
         />
         <Modal
-          title="Cadastro de Empresa"
+          title={activeRecord !== null ? "Dados da Empresa" : "Cadastro de Empresa"}
           onCancel={handleCancel}
           open={open}
           onOk={handleOk}
@@ -137,6 +167,8 @@ const ListagemEmpresas = () => {
                   className="form-control formInput"
                   id="razaosocial"
                   placeholder="razaosocial"
+                  value = {activeRecord !== null ? activeRecord?.razaosocial : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Razão Social</label>
               </div>
@@ -144,8 +176,9 @@ const ListagemEmpresas = () => {
                 <IMaskInput
                   className="form-control formInput"
                   id="cnpj"
-                  mask="00.000.000/0000-00"
                   placeholder="CNPJ"
+                  value = {activeRecord !== null ? activeRecord?.cnpj : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cnpj">CNPJ</label>
               </div>
@@ -154,9 +187,10 @@ const ListagemEmpresas = () => {
               <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="000.000.000.000"
                   id="inscricaoestadual"
                   placeholder="Inscrição Estadual"
+                  value = {activeRecord !== null ? activeRecord?.inscricaoestadual : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="inscricaoestadual">Inscrição Estadual</label>
               </div>
@@ -166,6 +200,8 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="endereco"
                   placeholder="Endereço"
+                  value = {activeRecord !== null ? activeRecord?.endereco : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="endereco">Endereço</label>
               </div>
@@ -175,6 +211,8 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="complemento"
                   placeholder="Complemento"
+                  value = {activeRecord !== null ? activeRecord?.complemento : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="complemento">Complemento</label>
               </div>
@@ -186,30 +224,33 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="bairro"
                   placeholder="Bairro"
+                  value = {activeRecord !== null ? activeRecord?.bairro : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="bairro">Bairro</label>
               </div>
               <div className="form-floating w-75">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="00000-000"
                   id="cep"
                   placeholder="Cep"
+                  value = {activeRecord !== null ? activeRecord?.cep : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cep">Cep</label>
               </div>
               <div className="form-floating w-100">
-                <select class="form-select formInput" aria-label="Default select example" id="cidade" name="cidade">
+                <select class="form-select formInput" aria-label="Default select example" id="cidade" name="cidade" value={activeRecord !== null ? activeRecord?.cidade : ""} disabled= {disabledInputs === true ? true : false}>
                   <option selected>Cidade</option>
-                  <option value="1">One</option>
+                  <option value="Cidade Exemplo">One</option>
                   <option value="2">Two</option>
                   <option value="3">Three</option>
                 </select>
               </div>
               <div className="form-floating w-25">
-              <select class="form-select formInput" aria-label="Default select example" id="uf" name="uf">
+              <select value={activeRecord !== null ? activeRecord?.uf : ""} class="form-select formInput" aria-label="Default select example" id="uf" name="uf" disabled= {disabledInputs === true ? true : false}>
                   <option selected>UF</option>
-                  <option value="1">One</option>
+                  <option value="SP">One</option>
                   <option value="2">Two</option>
                   <option value="3">Three</option>
                 </select>
@@ -219,9 +260,10 @@ const ListagemEmpresas = () => {
               <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="(00) 0 0000-0000"
                   id="telefone"
                   placeholder="Telefone"
+                  value = {activeRecord !== null ? activeRecord?.telefone : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
               </div>
@@ -231,6 +273,8 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="nomeresponsavel"
                   placeholder="Nome do Responsável"
+                  value = {activeRecord !== null ? activeRecord?.nomerespo : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nomeresponsavel">Nome do Responsável</label>
               </div>
@@ -240,6 +284,8 @@ const ListagemEmpresas = () => {
                   type="email"
                   id="emailresponsavel"
                   placeholder="Email do Responsável"
+                  value = {activeRecord !== null ? activeRecord?.emailresponsavel : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="emailresponsavel">Email do Responsável</label>
               </div>
@@ -248,9 +294,10 @@ const ListagemEmpresas = () => {
               <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="(00) 0 0000-0000"
                   id="telefoneresponsavel"
                   placeholder="Telefone do Responsável"
+                  value = {activeRecord !== null ? activeRecord?.telefoneresponsavel : ""}
+                  disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefoneresponsavel">Telefone do Responsável</label>
               </div>

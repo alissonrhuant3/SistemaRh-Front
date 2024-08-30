@@ -1,11 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Table, Modal } from "antd";
+import { Table, Modal, Button } from "antd";
 import { AiFillDelete } from "react-icons/ai";
 import { FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmpresas } from "../features/empresas/empresaSlice";
+import { getEmpresas, resetState, updateEmpresa } from "../features/empresas/empresaSlice";
+import { FaRegEdit } from "react-icons/fa";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+
+let schema = Yup.object().shape({
+  razaosocial: Yup.string().required("Razão Social da empresa é obrigatório!"),
+  cnpj: Yup.number().required("cnpj é Requerido!"),
+  inscricaoestadual: Yup.number().required("Inscrição Estadual é Requerido!"),
+  endereco: Yup.string().required("Endereço é Obrigatório!"),
+  bairro: Yup.string().required("Bairro é Obrigatório!"),
+  cep: Yup.number().required("cep é Obrigatório!"),
+  telefone: Yup.number().required("Telefone é Obrigatório!"),
+  nomeresponsavel: Yup.string().required("Nome do Responsável é Obrigatório!"),
+  emailresponsavel: Yup.string().required("Email do Responsável é Obrigatório!"),
+  telefoneresponsavel: Yup.number().required("Telefone do Responsável é Obrigatório!"),
+});
 
 const columns = [
   {
@@ -44,21 +61,19 @@ const ListagemEmpresas = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
+  
   console.log(activeRecord);
   
   const dispatch = useDispatch();
   const getEmpresaState = useSelector((state) => state.empresa.empresas)
+  const getEmpresaEstado = useSelector((state) => state.empresa)
+  const {isSuccess, isError, isLoading, message, updatedEmpresa} = getEmpresaEstado;
   const showModal = () => {
     setOpen(true);
   };
   const handleOk = () => {
-    alert("O Augusto quer ser Homem");
-    setConfirmLoading(true);
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 2000);
-  };
+  toast.info("Você precisa ativar a edição para enviar")
+   };
   const handleCancel = () => {
     setActiveRecord(null);
     setDisabledInputs(false);
@@ -66,8 +81,64 @@ const ListagemEmpresas = () => {
   };
 
   useEffect(() => {
+    if(isSuccess && updatedEmpresa) {
+      setTimeout(() => {
+        toast.success("Dados da empresa atualizados com Sucesso!");
+        dispatch(resetState())
+        dispatch(getEmpresas())
+      }, 300);
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        setActiveRecord(null);
+        formik.resetForm();
+      }, 2000);
+    } else if (isError) {
+      setTimeout(() => {
+        toast.error("Algo deu errado!")
+        setConfirmLoading(false);
+      }, 1000);
+    }
+  },[isSuccess, isError, isLoading, message, updatedEmpresa])
+
+  useEffect(() => {
     dispatch(getEmpresas())
   },[])
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      razaosocial: activeRecord !== null ? activeRecord?.razaosocial : "",
+      cnpj: activeRecord !== null ? activeRecord?.cnpj : "",
+      inscricaoestadual: activeRecord !== null ? activeRecord?.inscricaoestadual : "",
+      endereco: activeRecord !== null ? activeRecord?.endereco : "",
+      complemento: activeRecord !== null ? activeRecord?.complemento : "",
+      bairro: activeRecord !== null ? activeRecord?.bairro : "",
+      cep: activeRecord !== null ? activeRecord?.cep : "",
+      telefone: activeRecord !== null ? activeRecord?.telefone : "",
+      nomeresponsavel: activeRecord !== null ? activeRecord?.nomerespo : "",
+      emailresponsavel: activeRecord !== null ? activeRecord?.emailresponsavel : "",
+      telefoneresponsavel: activeRecord !== null ? activeRecord?.telefoneresponsavel : "",
+    },
+    validationSchema: schema,
+    onSubmit: (values) => {
+      if(activeRecord !== null) {
+        setConfirmLoading(true);
+        dispatch(updateEmpresa({id: activeRecord.id, empresaData: values}));
+      } else {
+
+      }
+      // if (getBlogId !== undefined) {
+        
+      // } else {
+      //   dispatch(createBlog(values));
+      //   formik.resetForm();
+      //   setTimeout(() => {
+      //     // dispatch(resetState());
+      //   }, 300);
+      // }
+    },
+  });
 
   const data1 = [];
   for (let i = 0; i < getEmpresaState?.length; i++) {
@@ -152,14 +223,15 @@ const ListagemEmpresas = () => {
         />
         <Modal
           title={activeRecord !== null ? "Dados da Empresa" : "Cadastro de Empresa"}
-          onCancel={handleCancel}
           open={open}
-          onOk={handleOk}
+          onCancel={handleCancel}
+          onOk={disabledInputs === false ? formik.handleSubmit : handleOk}
           confirmLoading={confirmLoading}
           maskClosable={false}
           width={"75%"}
         >
-          <form>
+          {activeRecord !== null ? <div className="text-end buttonEditOnOFf"><FaRegEdit title={disabledInputs === false ? "Desabilitar Edição" : "Habilitar Edição"} onClick={() => disabledInputs === false ? setDisabledInputs(true) : setDisabledInputs(false)} className={`${disabledInputs === false ? "bg-gray" : ""} mb-2 buttonEditOnOff__button`}/></div> : ""}
+          <form onSubmit={formik.handleSubmit}>
             <div className="mb-3 d-flex gap-2">
               <div className="form-floating w-100">
                 <IMaskInput
@@ -167,20 +239,33 @@ const ListagemEmpresas = () => {
                   className="form-control formInput"
                   id="razaosocial"
                   placeholder="razaosocial"
-                  value = {activeRecord !== null ? activeRecord?.razaosocial : ""}
+                  name="razaosocial"
+                  onChange={formik.handleChange("razaosocial")}
+                  onBlur={formik.handleBlur("razaosocial")}
+                  value={formik.values.razaosocial}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Razão Social</label>
+                <div className="error">
+                  {formik.touched.razaosocial && formik.errors.razaosocial}
+                </div>
               </div>
+              
               <div className="form-floating w-25">
                 <IMaskInput
                   className="form-control formInput"
                   id="cnpj"
                   placeholder="CNPJ"
-                  value = {activeRecord !== null ? activeRecord?.cnpj : ""}
+                  name="cnpj"
+                  onChange={formik.handleChange("cnpj")}
+                  onBlur={formik.handleBlur("cnpj")}
+                  value = {formik.values.cnpj}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cnpj">CNPJ</label>
+                <div className="error">
+                  {formik.touched.cnpj && formik.errors.cnpj}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -189,10 +274,16 @@ const ListagemEmpresas = () => {
                   className="form-control formInput"
                   id="inscricaoestadual"
                   placeholder="Inscrição Estadual"
-                  value = {activeRecord !== null ? activeRecord?.inscricaoestadual : ""}
+                  name="inscricaoestadual"
+                  onChange={formik.handleChange("inscricaoestadual")}
+                  onBlur={formik.handleBlur("inscricaoestadual")}
+                  value = {formik.values.inscricaoestadual}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="inscricaoestadual">Inscrição Estadual</label>
+                <div className="error">
+                  {formik.touched.inscricaoestadual && formik.errors.inscricaoestadual}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -200,10 +291,16 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="endereco"
                   placeholder="Endereço"
-                  value = {activeRecord !== null ? activeRecord?.endereco : ""}
+                  name="endereco"
+                  onChange={formik.handleChange("endereco")}
+                  onBlur={formik.handleBlur("endereco")}
+                  value = {formik.values.endereco}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="endereco">Endereço</label>
+                <div className="error">
+                  {formik.touched.endereco && formik.errors.endereco}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -211,7 +308,10 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="complemento"
                   placeholder="Complemento"
-                  value = {activeRecord !== null ? activeRecord?.complemento : ""}
+                  name="complemento"
+                  onChange={formik.handleChange("complemento")}
+                  onBlur={formik.handleBlur("complemento")}
+                  value = {formik.values.complemento}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="complemento">Complemento</label>
@@ -224,20 +324,32 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="bairro"
                   placeholder="Bairro"
-                  value = {activeRecord !== null ? activeRecord?.bairro : ""}
+                  name="bairro"
+                  onChange={formik.handleChange("bairro")}
+                  onBlur={formik.handleBlur("bairro")}
+                  value = {formik.values.bairro}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="bairro">Bairro</label>
+                <div className="error">
+                  {formik.touched.bairro && formik.errors.bairro}
+                </div>
               </div>
               <div className="form-floating w-75">
                 <IMaskInput
                   className="form-control formInput"
                   id="cep"
                   placeholder="Cep"
-                  value = {activeRecord !== null ? activeRecord?.cep : ""}
+                  name="cep"
+                  onChange={formik.handleChange("cep")}
+                  onBlur={formik.handleBlur("cep")}
+                  value = {formik.values.cep}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cep">Cep</label>
+                <div className="error">
+                  {formik.touched.cep && formik.errors.cep}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <select class="form-select formInput" aria-label="Default select example" id="cidade" name="cidade" value={activeRecord !== null ? activeRecord?.cidade : ""} disabled= {disabledInputs === true ? true : false}>
@@ -262,10 +374,16 @@ const ListagemEmpresas = () => {
                   className="form-control formInput"
                   id="telefone"
                   placeholder="Telefone"
-                  value = {activeRecord !== null ? activeRecord?.telefone : ""}
+                  name="telefone"
+                  onChange={formik.handleChange("telefone")}
+                  onBlur={formik.handleBlur("telefone")}
+                  value = {formik.values.telefone}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
+                <div className="error">
+                  {formik.touched.telefone && formik.errors.telefone}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -273,10 +391,16 @@ const ListagemEmpresas = () => {
                   type="text"
                   id="nomeresponsavel"
                   placeholder="Nome do Responsável"
-                  value = {activeRecord !== null ? activeRecord?.nomerespo : ""}
+                  name="nomeresponsavel"
+                  onChange={formik.handleChange("nomeresponsavel")}
+                  onBlur={formik.handleBlur("nomeresponsavel")}
+                  value = {formik.values.nomeresponsavel}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nomeresponsavel">Nome do Responsável</label>
+                <div className="error">
+                  {formik.touched.nomeresponsavel && formik.errors.nomeresponsavel}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -284,10 +408,16 @@ const ListagemEmpresas = () => {
                   type="email"
                   id="emailresponsavel"
                   placeholder="Email do Responsável"
-                  value = {activeRecord !== null ? activeRecord?.emailresponsavel : ""}
+                  name="emailresponsavel"
+                  onChange={formik.handleChange("emailresponsavel")}
+                  onBlur={formik.handleBlur("emailresponsavel")}
+                  value = {formik.values.emailresponsavel}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="emailresponsavel">Email do Responsável</label>
+                <div className="error">
+                  {formik.touched.emailresponsavel && formik.errors.emailresponsavel}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -296,10 +426,16 @@ const ListagemEmpresas = () => {
                   className="form-control formInput"
                   id="telefoneresponsavel"
                   placeholder="Telefone do Responsável"
-                  value = {activeRecord !== null ? activeRecord?.telefoneresponsavel : ""}
+                  name="telefoneresponsavel"
+                  onChange={formik.handleChange("telefoneresponsavel")}
+                  onBlur={formik.handleBlur("telefoneresponsavel")}
+                  value = {formik.values.telefoneresponsavel}
                   disabled= {disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefoneresponsavel">Telefone do Responsável</label>
+                <div className="error">
+                  {formik.touched.telefoneresponsavel && formik.errors.telefoneresponsavel}
+                </div>
               </div>
             </div>
           </form>

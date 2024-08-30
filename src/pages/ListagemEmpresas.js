@@ -5,7 +5,11 @@ import { FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmpresas, resetState, updateEmpresa } from "../features/empresas/empresaSlice";
+import {
+  getEmpresas,
+  resetState,
+  updateEmpresa,
+} from "../features/empresas/empresaSlice";
 import { FaRegEdit } from "react-icons/fa";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,11 +21,17 @@ let schema = Yup.object().shape({
   inscricaoestadual: Yup.number().required("Inscrição Estadual é Requerido!"),
   endereco: Yup.string().required("Endereço é Obrigatório!"),
   bairro: Yup.string().required("Bairro é Obrigatório!"),
+  cidade: Yup.string().required("Cidade é Obrigatório!"),
   cep: Yup.number().required("cep é Obrigatório!"),
+  uf: Yup.string().required("UF é Obrigatório!"),
   telefone: Yup.number().required("Telefone é Obrigatório!"),
   nomeresponsavel: Yup.string().required("Nome do Responsável é Obrigatório!"),
-  emailresponsavel: Yup.string().required("Email do Responsável é Obrigatório!"),
-  telefoneresponsavel: Yup.number().required("Telefone do Responsável é Obrigatório!"),
+  emailresponsavel: Yup.string().required(
+    "Email do Responsável é Obrigatório!"
+  ),
+  telefoneresponsavel: Yup.number().required(
+    "Telefone do Responsável é Obrigatório!"
+  ),
 });
 
 const columns = [
@@ -55,25 +65,25 @@ const columns = [
   },
 ];
 
-
 const ListagemEmpresas = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
-  
+
   console.log(activeRecord);
-  
+
   const dispatch = useDispatch();
-  const getEmpresaState = useSelector((state) => state.empresa.empresas)
-  const getEmpresaEstado = useSelector((state) => state.empresa)
-  const {isSuccess, isError, isLoading, message, updatedEmpresa} = getEmpresaEstado;
+  const getEmpresaState = useSelector((state) => state.empresa.empresas);
+  const getEmpresaEstado = useSelector((state) => state.empresa);
+  const { isSuccess, isError, isLoading, message, updatedEmpresa } =
+    getEmpresaEstado;
   const showModal = () => {
     setOpen(true);
   };
   const handleOk = () => {
-  toast.info("Você precisa ativar a edição para enviar")
-   };
+    toast.info("Você precisa ativar a edição para enviar");
+  };
   const handleCancel = () => {
     setActiveRecord(null);
     setDisabledInputs(false);
@@ -81,11 +91,11 @@ const ListagemEmpresas = () => {
   };
 
   useEffect(() => {
-    if(isSuccess && updatedEmpresa) {
+    if (isSuccess && updatedEmpresa) {
       setTimeout(() => {
         toast.success("Dados da empresa atualizados com Sucesso!");
-        dispatch(resetState())
-        dispatch(getEmpresas())
+        dispatch(resetState());
+        dispatch(getEmpresas());
       }, 300);
       setTimeout(() => {
         setOpen(false);
@@ -95,41 +105,45 @@ const ListagemEmpresas = () => {
       }, 2000);
     } else if (isError) {
       setTimeout(() => {
-        toast.error("Algo deu errado!")
+        toast.error("Algo deu errado!");
         setConfirmLoading(false);
       }, 1000);
     }
-  },[isSuccess, isError, isLoading, message, updatedEmpresa])
+  }, [isSuccess, isError, isLoading, message, updatedEmpresa]);
 
   useEffect(() => {
-    dispatch(getEmpresas())
-  },[])
+    dispatch(getEmpresas());
+  }, []);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
       razaosocial: activeRecord !== null ? activeRecord?.razaosocial : "",
+      uf: activeRecord !== null ? activeRecord?.uf : "",
       cnpj: activeRecord !== null ? activeRecord?.cnpj : "",
-      inscricaoestadual: activeRecord !== null ? activeRecord?.inscricaoestadual : "",
+      inscricaoestadual:
+        activeRecord !== null ? activeRecord?.inscricaoestadual : "",
       endereco: activeRecord !== null ? activeRecord?.endereco : "",
       complemento: activeRecord !== null ? activeRecord?.complemento : "",
       bairro: activeRecord !== null ? activeRecord?.bairro : "",
       cep: activeRecord !== null ? activeRecord?.cep : "",
+      cidade: activeRecord !== null ? activeRecord?.cidade : "",
       telefone: activeRecord !== null ? activeRecord?.telefone : "",
       nomeresponsavel: activeRecord !== null ? activeRecord?.nomerespo : "",
-      emailresponsavel: activeRecord !== null ? activeRecord?.emailresponsavel : "",
-      telefoneresponsavel: activeRecord !== null ? activeRecord?.telefoneresponsavel : "",
+      emailresponsavel:
+        activeRecord !== null ? activeRecord?.emailresponsavel : "",
+      telefoneresponsavel:
+        activeRecord !== null ? activeRecord?.telefoneresponsavel : "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      if(activeRecord !== null) {
+      if (activeRecord !== null) {
         setConfirmLoading(true);
-        dispatch(updateEmpresa({id: activeRecord.id, empresaData: values}));
+        dispatch(updateEmpresa({ id: activeRecord.id, empresaData: values }));
       } else {
-
       }
       // if (getBlogId !== undefined) {
-        
+
       // } else {
       //   dispatch(createBlog(values));
       //   formik.resetForm();
@@ -142,34 +156,34 @@ const ListagemEmpresas = () => {
 
   const data1 = [];
   for (let i = 0; i < getEmpresaState?.length; i++) {
-  data1.push({
-    key: i + 1,
-    cnpj: getEmpresaState[i]?.cnpj,
-    razaosocial: getEmpresaState[i]?.razaosocial,
-    inscricaoestadual: getEmpresaState[i]?.inscricaoestadual,
-    endereco: getEmpresaState[i]?.endereco,
-    complemento: getEmpresaState[i]?.complemento,
-    bairro: getEmpresaState[i]?.bairro,
-    cep: getEmpresaState[i]?.cep,
-    cidade: getEmpresaState[i]?.cidade,
-    uf: getEmpresaState[i]?.uf,
-    telefone: getEmpresaState[i]?.telefone,
-    nomerespo: getEmpresaState[i]?.nomeresponsavel,
-    emailresponsavel: getEmpresaState[i]?.emailresponsavel,
-    telefoneresponsavel: getEmpresaState[i]?.telefoneresponsavel,
-    id: getEmpresaState[i]?._id,
-    acoes: (
-      <>
-        <button className="bg-transparent border-0 text-blue">
-          <GrFormView className="fs-4" />
-        </button>
-        <button className="bg-transparent border-0 text-danger">
-          <AiFillDelete className="fs-5" />
-        </button>
-      </>
-    ),
-  });
-}
+    data1.push({
+      key: i + 1,
+      cnpj: getEmpresaState[i]?.cnpj,
+      razaosocial: getEmpresaState[i]?.razaosocial,
+      inscricaoestadual: getEmpresaState[i]?.inscricaoestadual,
+      endereco: getEmpresaState[i]?.endereco,
+      complemento: getEmpresaState[i]?.complemento,
+      bairro: getEmpresaState[i]?.bairro,
+      cep: getEmpresaState[i]?.cep,
+      cidade: getEmpresaState[i]?.cidade,
+      uf: getEmpresaState[i]?.uf,
+      telefone: getEmpresaState[i]?.telefone,
+      nomerespo: getEmpresaState[i]?.nomeresponsavel,
+      emailresponsavel: getEmpresaState[i]?.emailresponsavel,
+      telefoneresponsavel: getEmpresaState[i]?.telefoneresponsavel,
+      id: getEmpresaState[i]?._id,
+      acoes: (
+        <>
+          <button className="bg-transparent border-0 text-blue">
+            <GrFormView className="fs-4" />
+          </button>
+          <button className="bg-transparent border-0 text-danger">
+            <AiFillDelete className="fs-5" />
+          </button>
+        </>
+      ),
+    });
+  }
 
   return (
     <div className="list-empresas">
@@ -222,7 +236,9 @@ const ListagemEmpresas = () => {
           rowClassName="custom-table-row"
         />
         <Modal
-          title={activeRecord !== null ? "Dados da Empresa" : "Cadastro de Empresa"}
+          title={
+            activeRecord !== null ? "Dados da Empresa" : "Cadastro de Empresa"
+          }
           open={open}
           onCancel={handleCancel}
           onOk={disabledInputs === false ? formik.handleSubmit : handleOk}
@@ -230,8 +246,28 @@ const ListagemEmpresas = () => {
           maskClosable={false}
           width={"75%"}
         >
-          {activeRecord !== null ? <div className="text-end buttonEditOnOFf"><FaRegEdit title={disabledInputs === false ? "Desabilitar Edição" : "Habilitar Edição"} onClick={() => disabledInputs === false ? setDisabledInputs(true) : setDisabledInputs(false)} className={`${disabledInputs === false ? "bg-gray" : ""} mb-2 buttonEditOnOff__button`}/></div> : ""}
-          <form onSubmit={formik.handleSubmit}>
+          {activeRecord !== null ? (
+            <div className="text-end buttonEditOnOFf">
+              <FaRegEdit
+                title={
+                  disabledInputs === false
+                    ? "Desabilitar Edição"
+                    : "Habilitar Edição"
+                }
+                onClick={() =>
+                  disabledInputs === false
+                    ? setDisabledInputs(true)
+                    : setDisabledInputs(false)
+                }
+                className={`${
+                  disabledInputs === false ? "bg-gray" : ""
+                } mb-2 buttonEditOnOff__button`}
+              />
+            </div>
+          ) : (
+            ""
+          )}
+          <form className="formEmpresa" onSubmit={formik.handleSubmit}>
             <div className="mb-3 d-flex gap-2">
               <div className="form-floating w-100">
                 <IMaskInput
@@ -243,14 +279,14 @@ const ListagemEmpresas = () => {
                   onChange={formik.handleChange("razaosocial")}
                   onBlur={formik.handleBlur("razaosocial")}
                   value={formik.values.razaosocial}
-                  disabled= {disabledInputs === true ? true : false}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Razão Social</label>
                 <div className="error">
                   {formik.touched.razaosocial && formik.errors.razaosocial}
                 </div>
               </div>
-              
+
               <div className="form-floating w-25">
                 <IMaskInput
                   className="form-control formInput"
@@ -259,8 +295,8 @@ const ListagemEmpresas = () => {
                   name="cnpj"
                   onChange={formik.handleChange("cnpj")}
                   onBlur={formik.handleBlur("cnpj")}
-                  value = {formik.values.cnpj}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.cnpj}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cnpj">CNPJ</label>
                 <div className="error">
@@ -277,12 +313,13 @@ const ListagemEmpresas = () => {
                   name="inscricaoestadual"
                   onChange={formik.handleChange("inscricaoestadual")}
                   onBlur={formik.handleBlur("inscricaoestadual")}
-                  value = {formik.values.inscricaoestadual}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.inscricaoestadual}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="inscricaoestadual">Inscrição Estadual</label>
                 <div className="error">
-                  {formik.touched.inscricaoestadual && formik.errors.inscricaoestadual}
+                  {formik.touched.inscricaoestadual &&
+                    formik.errors.inscricaoestadual}
                 </div>
               </div>
               <div className="form-floating w-100">
@@ -294,8 +331,8 @@ const ListagemEmpresas = () => {
                   name="endereco"
                   onChange={formik.handleChange("endereco")}
                   onBlur={formik.handleBlur("endereco")}
-                  value = {formik.values.endereco}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.endereco}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="endereco">Endereço</label>
                 <div className="error">
@@ -311,8 +348,8 @@ const ListagemEmpresas = () => {
                   name="complemento"
                   onChange={formik.handleChange("complemento")}
                   onBlur={formik.handleBlur("complemento")}
-                  value = {formik.values.complemento}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.complemento}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="complemento">Complemento</label>
               </div>
@@ -327,8 +364,8 @@ const ListagemEmpresas = () => {
                   name="bairro"
                   onChange={formik.handleChange("bairro")}
                   onBlur={formik.handleBlur("bairro")}
-                  value = {formik.values.bairro}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.bairro}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="bairro">Bairro</label>
                 <div className="error">
@@ -343,8 +380,8 @@ const ListagemEmpresas = () => {
                   name="cep"
                   onChange={formik.handleChange("cep")}
                   onBlur={formik.handleBlur("cep")}
-                  value = {formik.values.cep}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.cep}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cep">Cep</label>
                 <div className="error">
@@ -352,20 +389,64 @@ const ListagemEmpresas = () => {
                 </div>
               </div>
               <div className="form-floating w-100">
-                <select class="form-select formInput" aria-label="Default select example" id="cidade" name="cidade" value={activeRecord !== null ? activeRecord?.cidade : ""} disabled= {disabledInputs === true ? true : false}>
-                  <option selected>Cidade</option>
-                  <option value="Cidade Exemplo">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
+              <IMaskInput
+                  className="form-control formInput"
+                  id="cidade"
+                  placeholder="cidade"
+                  name="cidade"
+                  onChange={formik.handleChange("cidade")}
+                  onBlur={formik.handleBlur("cidade")}
+                  value={formik.values.cidade}
+                  disabled={disabledInputs === true ? true : false}
+                />
+                <label htmlFor="cidade">Cidade</label>
+                <div className="error">
+                  {formik.touched.cidade && formik.errors.cidade}
+                </div>
               </div>
               <div className="form-floating w-25">
-              <select value={activeRecord !== null ? activeRecord?.uf : ""} class="form-select formInput" aria-label="Default select example" id="uf" name="uf" disabled= {disabledInputs === true ? true : false}>
+                <select
+                  value={formik.values.uf}
+                  className="form-select formInput formEmpresa__uf"
+                  aria-label="Default select example"
+                  onChange={formik.handleChange("uf")}
+                  onBlur={formik.handleBlur("uf")}
+                  id="uf"
+                  name="uf"
+                  disabled={disabledInputs === true ? true : false}
+                >
                   <option selected>UF</option>
-                  <option value="SP">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value="MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
                 </select>
+                <div className="error">
+                  {formik.touched.uf && formik.errors.uf}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -377,8 +458,8 @@ const ListagemEmpresas = () => {
                   name="telefone"
                   onChange={formik.handleChange("telefone")}
                   onBlur={formik.handleBlur("telefone")}
-                  value = {formik.values.telefone}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.telefone}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
                 <div className="error">
@@ -394,12 +475,13 @@ const ListagemEmpresas = () => {
                   name="nomeresponsavel"
                   onChange={formik.handleChange("nomeresponsavel")}
                   onBlur={formik.handleBlur("nomeresponsavel")}
-                  value = {formik.values.nomeresponsavel}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.nomeresponsavel}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nomeresponsavel">Nome do Responsável</label>
                 <div className="error">
-                  {formik.touched.nomeresponsavel && formik.errors.nomeresponsavel}
+                  {formik.touched.nomeresponsavel &&
+                    formik.errors.nomeresponsavel}
                 </div>
               </div>
               <div className="form-floating w-100">
@@ -411,12 +493,13 @@ const ListagemEmpresas = () => {
                   name="emailresponsavel"
                   onChange={formik.handleChange("emailresponsavel")}
                   onBlur={formik.handleBlur("emailresponsavel")}
-                  value = {formik.values.emailresponsavel}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.emailresponsavel}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="emailresponsavel">Email do Responsável</label>
                 <div className="error">
-                  {formik.touched.emailresponsavel && formik.errors.emailresponsavel}
+                  {formik.touched.emailresponsavel &&
+                    formik.errors.emailresponsavel}
                 </div>
               </div>
             </div>
@@ -429,12 +512,15 @@ const ListagemEmpresas = () => {
                   name="telefoneresponsavel"
                   onChange={formik.handleChange("telefoneresponsavel")}
                   onBlur={formik.handleBlur("telefoneresponsavel")}
-                  value = {formik.values.telefoneresponsavel}
-                  disabled= {disabledInputs === true ? true : false}
+                  value={formik.values.telefoneresponsavel}
+                  disabled={disabledInputs === true ? true : false}
                 />
-                <label htmlFor="telefoneresponsavel">Telefone do Responsável</label>
+                <label htmlFor="telefoneresponsavel">
+                  Telefone do Responsável
+                </label>
                 <div className="error">
-                  {formik.touched.telefoneresponsavel && formik.errors.telefoneresponsavel}
+                  {formik.touched.telefoneresponsavel &&
+                    formik.errors.telefoneresponsavel}
                 </div>
               </div>
             </div>

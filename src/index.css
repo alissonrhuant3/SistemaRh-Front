@@ -10,6 +10,10 @@ body {
   color: red;
 }
 
+.w-20 {
+  width: 20% !important;
+}
+
 .trigger {
   padding: 0 24px;
   font-size: 18px;
@@ -215,6 +219,10 @@ main {
   overflow: hidden !important;
 }
 
+.formEmpresa .formEmpresa__uf  {
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
 
 /***** Fim Listagem Empresas *****/
 

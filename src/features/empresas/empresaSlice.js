@@ -47,6 +47,17 @@ export const createEmpresa = createAsyncThunk(
   }
 );
 
+export const getProjetosEmpresa = createAsyncThunk(
+  "empresa/get-projetos",
+  async (Data,thunkAPI) => {
+    try {
+      return await empresaService.getProjetosEmpresa(Data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const resetState = createAction("Reset_all");
 
 const initialState = {
@@ -122,6 +133,22 @@ export const empresaSlice = createSlice({
       state.message = "Empresa deletada com sucesso";
     })
     .addCase(deleteEmpresa.rejected, (state, action) => {
+      state.isLoading = false;
+      state.isError = true;
+      state.isSuccess = false;
+      state.message = action.error;
+    })
+    .addCase(getProjetosEmpresa.pending, (state) => {
+      state.isLoading = true;
+    })
+    .addCase(getProjetosEmpresa.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isError = false;
+      state.isSuccess = true;
+      state.projetosEmpresa = action.payload;
+      state.message = "Empresa deletada com sucesso";
+    })
+    .addCase(getProjetosEmpresa.rejected, (state, action) => {
       state.isLoading = false;
       state.isError = true;
       state.isSuccess = false;

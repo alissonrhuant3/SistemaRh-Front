@@ -18,9 +18,12 @@ const createEmpresa = async (empresaData) => {
 }
 
 const deleteEmpresa = async (id) => {
-  console.log(id);
-  
   const response = await axios.delete(`${base_url}/empresa/delete-empresa/${id}`, config);
+  return response.data;
+}
+
+const getProjetosEmpresa = async () => {
+  const response = await axios.get(`${base_url}/empresa/projetos`, config)
   return response.data;
 }
 
@@ -29,6 +32,7 @@ const empresaService = {
   editEmpresa,
   createEmpresa,
   deleteEmpresa,
+  getProjetosEmpresa,
 };
 
 export default empresaService;

@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Modal, Space, Input } from "antd";
 import { AiFillDelete } from "react-icons/ai";
-import { FaSearch } from "react-icons/fa";
+import { FaRegEdit, FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getProjetosEmpresa } from "../features/empresas/empresaSlice";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { createProjetos, getAllProjetos, resetState, updateAProjeto } from "../features/projetos/projetoSlice";
+
+let schema = Yup.object().shape({
+  nome: Yup.string().required("Nome do projeto é obrigatório!"),
+  descricao: Yup.string().required("Descrição é Requerido!"),
+  horasestimadas: Yup.number().required("Horas estimadas é Requerido!"),
+});
 
 const columns = [
-  {
-    title: "N/S",
-    dataIndex: "key",
-  },
   {
     title: "Nome",
     dataIndex: "nome",
@@ -29,13 +36,98 @@ const columns = [
     dataIndex: "acoes",
   },
 ];
-const data1 = [];
-for (let i = 0; i < 25; i++) {
+
+
+const ListagemProjetos = () => {
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [activeRecord, setActiveRecord] = useState(null);
+  const [disabledInputs, setDisabledInputs] = useState(false);
+  const [projetoId, setProjetoId] = useState(0);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const projetosState = useSelector((state) => state.empresa.projetosEmpresa)
+  const projetosEstado = useSelector((state) => state.projeto)
+  const { isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto } = projetosEstado;
+  const showModal = () => {
+    setOpen(true);
+  };
+  const handleOk = () => {
+    toast.info("Você precisa ativar a edição para enviar");
+  };
+  const handleCancel = () => {
+    setActiveRecord(null);
+    setDisabledInputs(false);
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    if (isSuccess && updatedProjeto) {
+      setTimeout(() => {
+        toast.success("Dados do projeto atualizados com Sucesso!");
+        dispatch(resetState());
+        dispatch(getProjetosEmpresa());
+      }, 300);
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        setActiveRecord(null);
+        formik.resetForm();
+      }, 2000);
+    } else if (isSuccess && createdProjeto) {
+      setTimeout(() => {
+        toast.success("Projeto cadastrada com Sucesso!");
+        dispatch(resetState());
+        dispatch(getProjetosEmpresa());
+      }, 300)
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        formik.resetForm();
+      }, 2000);
+    } else if (isError) {
+      setTimeout(() => {
+        toast.error("Algo deu errado!");
+        setConfirmLoading(false);
+      }, 1000);
+    }
+  }, [isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto]);
+
+  useEffect(() => {
+    dispatch(getProjetosEmpresa())
+  },[])
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      nome: activeRecord !== null ? activeRecord?.nome : "",
+      descricao: activeRecord !== null ? activeRecord?.descricao : "",
+      horasestimadas: activeRecord !== null ? activeRecord?.horasestimadas : "",
+    },
+    validationSchema: schema,
+    onSubmit: (values) => {
+      console.log(values);
+      if (activeRecord !== null) {
+        setConfirmLoading(true);
+        dispatch(updateAProjeto({ id: activeRecord.id, projetoData: values }));
+      } else {
+        setConfirmLoading(true);
+        dispatch(createProjetos(values));
+      }
+    }
+  });
+
+  const data1 = [];
+  for (let i = 0; i < projetosState?.length; i++) {
   data1.push({
     key: i + 1,
-    nome: `Alisson Rhuan`,
-    descricao: "081.013.301-60",
-    horasestimadas: `58445484`,
+    nome: projetosState[i].nome,
+    descricao: projetosState[i].descricao,
+    horasestimadas: projetosState[i].horasestimadas,
+    empresa: projetosState[i].empresa,
+    id: projetosState[i]._id,
+    createdAt: projetosState[i].createdAt,
+    updatedAt: projetosState[i].updatedAt,
     acoes: (
       <>
         <button className="bg-transparent border-0 text-blue">
@@ -48,26 +140,6 @@ for (let i = 0; i < 25; i++) {
     ),
   });
 }
-
-const ListagemProjetos = () => {
-  const [open, setOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const navigate = useNavigate();
-  const showModal = () => {
-    setOpen(true);
-  };
-  const handleOk = () => {
-    alert("O Augusto quer ser Homem");
-    setConfirmLoading(true);
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 2000);
-  };
-  const handleCancel = () => {
-    console.log("Clicked cancel button");
-    setOpen(false);
-  };
 
 
   return (
@@ -110,7 +182,11 @@ const ListagemProjetos = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
+                console.log(record);
                 
+                setOpen(true);
+                setActiveRecord(record);
+                setDisabledInputs(true);
               },
             };
           }}
@@ -119,14 +195,35 @@ const ListagemProjetos = () => {
           rowClassName="custom-table-row"
         />
         <Modal
-          title="Cadastro de Projetos"
+          title= {activeRecord !== null ? "Edição de Projeto" : "Cadastro de Projetos"}
           onCancel={handleCancel}
           open={open}
-          onOk={handleOk}
+          onOk={disabledInputs === false ? formik.handleSubmit : handleOk}
           confirmLoading={confirmLoading}
           maskClosable={false}
           width={"50%"}
         >
+          {activeRecord !== null ? (
+            <div className="text-end buttonEditOnOFf">
+              <FaRegEdit
+                title={
+                  disabledInputs === false
+                    ? "Desabilitar Edição"
+                    : "Habilitar Edição"
+                }
+                onClick={() =>
+                  disabledInputs === false
+                    ? setDisabledInputs(true)
+                    : setDisabledInputs(false)
+                }
+                className={`${
+                  disabledInputs === false ? "bg-gray" : ""
+                } mb-2 buttonEditOnOff__button`}
+              />
+            </div>
+          ) : (
+            ""
+          )}
           <form>
             <h4 className="border-bottom">Dados do Projeto</h4>
             <div className="mb-3">
@@ -136,6 +233,11 @@ const ListagemProjetos = () => {
                   className="form-control formInput"
                   id="nome"
                   placeholder="nome"
+                  name="nome"
+                  onChange={formik.handleChange("nome")}
+                  onBlur={formik.handleBlur("nome")}
+                  value={formik.values.nome}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Nome</label>
               </div>
@@ -145,6 +247,11 @@ const ListagemProjetos = () => {
                   className="form-control formInput"
                   id="descricao"
                   placeholder="Descrição"
+                  name="descricao"
+                  onChange={formik.handleChange("descricao")}
+                  onBlur={formik.handleBlur("descricao")}
+                  value={formik.values.descricao}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="descricao">Descrição</label>
               </div>
@@ -154,6 +261,11 @@ const ListagemProjetos = () => {
                   className="form-control formInput"
                   id="horasestimadas"
                   placeholder="Horas estimadas"
+                  name="horasestimadas"
+                  onChange={formik.handleChange("horasestimadas")}
+                  onBlur={formik.handleBlur("horasestimadas")}
+                  value={formik.values.horasestimadas}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="horasestimadas">Horas estimadas</label>
               </div>

@@ -23,6 +23,30 @@ export const updateEmpresa = createAsyncThunk(
   }
 );
 
+export const deleteEmpresa = createAsyncThunk(
+  "empresa/delete-empresa",
+  async (id,thunkAPI) => {
+    console.log(id);
+    
+    try {
+      return await empresaService.deleteEmpresa(id);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const createEmpresa = createAsyncThunk(
+  "empresa/create-empresa",
+  async (Data,thunkAPI) => {
+    try {
+      return await empresaService.createEmpresa(Data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const resetState = createAction("Reset_all");
 
 const initialState = {
@@ -66,6 +90,38 @@ export const empresaSlice = createSlice({
       state.message = "Atualizado com sucesso";
     })
     .addCase(updateEmpresa.rejected, (state, action) => {
+      state.isLoading = false;
+      state.isError = true;
+      state.isSuccess = false;
+      state.message = action.error;
+    })
+    .addCase(createEmpresa.pending, (state) => {
+      state.isLoading = true;
+    })
+    .addCase(createEmpresa.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isError = false;
+      state.isSuccess = true;
+      state.createdEmpresa = action.payload;
+      state.message = "Empresa criada com sucesso";
+    })
+    .addCase(createEmpresa.rejected, (state, action) => {
+      state.isLoading = false;
+      state.isError = true;
+      state.isSuccess = false;
+      state.message = action.error;
+    })
+    .addCase(deleteEmpresa.pending, (state) => {
+      state.isLoading = true;
+    })
+    .addCase(deleteEmpresa.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isError = false;
+      state.isSuccess = true;
+      state.deletedEmpresa = action.payload;
+      state.message = "Empresa deletada com sucesso";
+    })
+    .addCase(deleteEmpresa.rejected, (state, action) => {
       state.isLoading = false;
       state.isError = true;
       state.isSuccess = false;

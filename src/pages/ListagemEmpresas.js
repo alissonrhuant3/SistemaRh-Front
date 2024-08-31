@@ -6,6 +6,8 @@ import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  createEmpresa,
+  deleteEmpresa,
   getEmpresas,
   resetState,
   updateEmpresa,
@@ -14,6 +16,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import CustomModal from "../components/CustomModal";
 
 let schema = Yup.object().shape({
   razaosocial: Yup.string().required("Razão Social da empresa é obrigatório!"),
@@ -67,19 +70,28 @@ const columns = [
 
 const ListagemEmpresas = () => {
   const [open, setOpen] = useState(false);
+  const [openModalConfirm, setOpenModalConfirm] = useState(false);
+  const [empresaId, setEmpresaId] = useState(0);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
 
-  console.log(activeRecord);
 
   const dispatch = useDispatch();
   const getEmpresaState = useSelector((state) => state.empresa.empresas);
   const getEmpresaEstado = useSelector((state) => state.empresa);
-  const { isSuccess, isError, isLoading, message, updatedEmpresa } =
+  const { isSuccess, isError, isLoading, message, updatedEmpresa, createdEmpresa } =
     getEmpresaEstado;
   const showModal = () => {
     setOpen(true);
+  };
+  const showModalConfirm = (e) => {
+    setEmpresaId(e)
+    setOpenModalConfirm(true);
+  };
+  const closeModalConfirm = () => {
+    setEmpresaId(0);
+    setOpenModalConfirm(false);
   };
   const handleOk = () => {
     toast.info("Você precisa ativar a edição para enviar");
@@ -103,13 +115,24 @@ const ListagemEmpresas = () => {
         setActiveRecord(null);
         formik.resetForm();
       }, 2000);
+    } else if (isSuccess && createdEmpresa) {
+      setTimeout(() => {
+        toast.success("Empresa cadastrada com Sucesso!");
+        dispatch(resetState());
+        dispatch(getEmpresas());
+      }, 300)
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        formik.resetForm();
+      }, 2000);
     } else if (isError) {
       setTimeout(() => {
         toast.error("Algo deu errado!");
         setConfirmLoading(false);
       }, 1000);
     }
-  }, [isSuccess, isError, isLoading, message, updatedEmpresa]);
+  }, [isSuccess, isError, isLoading, message, updatedEmpresa, createdEmpresa]);
 
   useEffect(() => {
     dispatch(getEmpresas());
@@ -141,6 +164,8 @@ const ListagemEmpresas = () => {
         setConfirmLoading(true);
         dispatch(updateEmpresa({ id: activeRecord.id, empresaData: values }));
       } else {
+        setConfirmLoading(true);
+        dispatch(createEmpresa(values));
       }
       // if (getBlogId !== undefined) {
 
@@ -177,13 +202,21 @@ const ListagemEmpresas = () => {
           <button className="bg-transparent border-0 text-blue">
             <GrFormView className="fs-4" />
           </button>
-          <button className="bg-transparent border-0 text-danger">
+          <button onClick={() => showModalConfirm(getEmpresaState[i]._id)} className="bg-transparent border-0 text-danger">
             <AiFillDelete className="fs-5" />
           </button>
         </>
       ),
     });
   }
+
+  const deleteAEmpresa = (e) => {
+    dispatch(deleteEmpresa(e));
+    setOpenModalConfirm(false);
+    setTimeout(() => {
+      dispatch(getEmpresas());
+    }, 100);
+  };
 
   return (
     <div className="list-empresas">
@@ -235,6 +268,9 @@ const ListagemEmpresas = () => {
           dataSource={data1}
           rowClassName="custom-table-row"
         />
+        <CustomModal hideModal={closeModalConfirm} open={openModalConfirm} performAction={() => {
+          deleteAEmpresa(empresaId)
+        }} title="Você tem certeza que deseja deletar essa empresa?"/>
         <Modal
           title={
             activeRecord !== null ? "Dados da Empresa" : "Cadastro de Empresa"
@@ -293,6 +329,7 @@ const ListagemEmpresas = () => {
                   id="cnpj"
                   placeholder="CNPJ"
                   name="cnpj"
+                  maxLength={14}
                   onChange={formik.handleChange("cnpj")}
                   onBlur={formik.handleBlur("cnpj")}
                   value={formik.values.cnpj}

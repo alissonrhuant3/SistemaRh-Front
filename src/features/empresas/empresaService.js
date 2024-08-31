@@ -8,14 +8,27 @@ const getEmpresas = async () => {
 };
 
 const editEmpresa = async (empresaData) => {
-  console.log(empresaData.empresaData);
-  const response = await axios.put(`${base_url}/empresa/editar-empresa/${empresaData.id}`,empresaData.empresaData, config)
+  const response = await axios.put(`${base_url}/empresa/editar-empresa/${empresaData.id}`,empresaData.empresaData, config);
   return response.data;
 } 
+
+const createEmpresa = async (empresaData) => {
+  const response = await axios.post(`${base_url}/empresa/registrar`, empresaData, config);
+  return response.data;
+}
+
+const deleteEmpresa = async (id) => {
+  console.log(id);
+  
+  const response = await axios.delete(`${base_url}/empresa/delete-empresa/${id}`, config);
+  return response.data;
+}
 
 const empresaService = {
   getEmpresas,
   editEmpresa,
+  createEmpresa,
+  deleteEmpresa,
 };
 
 export default empresaService;

@@ -10,7 +10,8 @@ import { getProjetosEmpresa } from "../features/empresas/empresaSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import { createProjetos, getAllProjetos, resetState, updateAProjeto } from "../features/projetos/projetoSlice";
+import { createProjetos, deleteProjeto, getAllProjetos, resetState, updateAProjeto } from "../features/projetos/projetoSlice";
+import CustomModal from "../components/CustomModal";
 
 let schema = Yup.object().shape({
   nome: Yup.string().required("Nome do projeto é obrigatório!"),
@@ -40,6 +41,7 @@ const columns = [
 
 const ListagemProjetos = () => {
   const [open, setOpen] = useState(false);
+  const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
@@ -48,9 +50,17 @@ const ListagemProjetos = () => {
   const dispatch = useDispatch();
   const projetosState = useSelector((state) => state.empresa.projetosEmpresa)
   const projetosEstado = useSelector((state) => state.projeto)
-  const { isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto } = projetosEstado;
+  const { isSuccess, isError, isLoading, message, updatedProjeto,createdProjeto, deletedProjeto } = projetosEstado;
   const showModal = () => {
     setOpen(true);
+  };
+  const showModalConfirm = (e) => {
+    setProjetoId(e)
+    setOpenModalConfirm(true);
+  };
+  const closeModalConfirm = () => {
+    setProjetoId(0);
+    setOpenModalConfirm(false);
   };
   const handleOk = () => {
     toast.info("Você precisa ativar a edição para enviar");
@@ -85,13 +95,19 @@ const ListagemProjetos = () => {
         setConfirmLoading(false);
         formik.resetForm();
       }, 2000);
+    } else if (isSuccess && deletedProjeto) {
+      setTimeout(() => {
+        toast.success("Projeto deletado com Sucesso!");
+        dispatch(resetState());
+        dispatch(getProjetosEmpresa());
+      }, 50)
     } else if (isError) {
       setTimeout(() => {
         toast.error("Algo deu errado!");
         setConfirmLoading(false);
       }, 1000);
     }
-  }, [isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto]);
+  }, [isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto, deletedProjeto]);
 
   useEffect(() => {
     dispatch(getProjetosEmpresa())
@@ -133,7 +149,7 @@ const ListagemProjetos = () => {
         <button className="bg-transparent border-0 text-blue">
           <GrFormView className="fs-4" />
         </button>
-        <button className="bg-transparent border-0 text-danger">
+        <button onClick={() => showModalConfirm(projetosState[i]._id)} className="bg-transparent border-0 text-danger">
           <AiFillDelete className="fs-5" />
         </button>
       </>
@@ -141,6 +157,13 @@ const ListagemProjetos = () => {
   });
 }
 
+  const deleteAProjeto = (e) => {
+    dispatch(deleteProjeto(e));
+    setOpenModalConfirm(false);
+    setTimeout(() => {
+      dispatch(getProjetosEmpresa());
+    }, 100);
+  };
 
   return (
     <div className="list-empresas">
@@ -194,6 +217,9 @@ const ListagemProjetos = () => {
           dataSource={data1}
           rowClassName="custom-table-row"
         />
+        <CustomModal hideModal={closeModalConfirm} open={openModalConfirm} performAction={() => {
+          deleteAProjeto(projetoId)
+        }} title="Você tem certeza que deseja deletar essa empresa?"/>
         <Modal
           title= {activeRecord !== null ? "Edição de Projeto" : "Cadastro de Projetos"}
           onCancel={handleCancel}
@@ -240,6 +266,9 @@ const ListagemProjetos = () => {
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Nome</label>
+                <div className="error">
+                  {formik.touched.nome && formik.errors.nome}
+                </div>
               </div>
               <div className="form-floating w-100 mb-3">
                 <IMaskInput
@@ -254,6 +283,9 @@ const ListagemProjetos = () => {
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="descricao">Descrição</label>
+                <div className="error">
+                  {formik.touched.descricao && formik.errors.descricao}
+                </div>
               </div>
               <div className="form-floating w-25 mb-3">
                 <IMaskInput
@@ -268,6 +300,9 @@ const ListagemProjetos = () => {
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="horasestimadas">Horas estimadas</label>
+                <div className="error">
+                  {formik.touched.horasestimadas && formik.errors.horasestimadas}
+                </div>
               </div>
             </div>
           </form>

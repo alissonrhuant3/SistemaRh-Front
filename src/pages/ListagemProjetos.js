@@ -219,7 +219,7 @@ const ListagemProjetos = () => {
         />
         <CustomModal hideModal={closeModalConfirm} open={openModalConfirm} performAction={() => {
           deleteAProjeto(projetoId)
-        }} title="Você tem certeza que deseja deletar essa empresa?"/>
+        }} title="Você tem certeza que deseja deletar esse projeto?"/>
         <Modal
           title= {activeRecord !== null ? "Edição de Projeto" : "Cadastro de Projetos"}
           onCancel={handleCancel}

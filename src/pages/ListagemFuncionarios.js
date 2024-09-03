@@ -1,18 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Modal, Space, Input } from "antd";
 import { AiFillDelete } from "react-icons/ai";
-import { FaSearch } from "react-icons/fa";
+import { FaRegEdit, FaSearch } from "react-icons/fa";
 import { GrFormView } from "react-icons/gr";
 import { IMaskInput } from "react-imask";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { HiViewGridAdd } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllFuncionarios,
+  getAllFuncionariosEmpresa,
+  getAllFuncionariosProjetos,
+} from "../features/auth/authSlice";
+import { getProjetosEmpresa } from "../features/empresas/empresaSlice";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+const moment = require("moment");
+
+let schema = Yup.object().shape({
+  nome: Yup.string().required("Nome é obrigatório!"),
+  cpf: Yup.number().required("CPF é obrigatório!"),
+  rg: Yup.number().required("RG é obrigatório!"),
+  data_nascimento: Yup.string().required("Data de nascimento é obrigatória!"),
+  endereco: Yup.string().required("Endereço é obrigatório!"),
+  bairro: Yup.string().required("Bairro é obrigatório!"),
+  cep: Yup.number().required("CEP é obrigatório!"),
+  cidade: Yup.string().required("Cidade é obrigatória!"),
+  uf: Yup.string().required("UF é obrigatório!"),
+  telefone: Yup.number().required("Telefone é obrigatório!"),
+  email: Yup.string().email("Email inválido!").required("Email é obrigatório!"),
+  data_admissao: Yup.string().required("Data de admissão é obrigatório!"),
+  valor_remuneracao: Yup.number().required("Valor de remuneração é obrigatório!"),
+  nome_banco: Yup.string().required("Nome do banco é obrigatório!"),
+  agencia: Yup.number().required("Agência é obrigatória!"),
+  conta: Yup.string().required("Conta é obrigatória!"),
+  tipo_conta: Yup.string().required("Tipo de conta é obrigatório!"),
+  // tipo_pix: Yup.string().required("Tipo de chave pix é obrigatório!"),
+});
 
 const columns = [
-  {
-    title: "N/S",
-    dataIndex: "key",
-  },
   {
     title: "Nome",
     dataIndex: "nome",
@@ -40,23 +68,42 @@ const ListagemFuncionarios = () => {
   const [openAssoc, setOpenAssoc] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmLoadingAssoc, setConfirmLoadingAssoc] = useState(false);
+  const [nameFuncAssoc, setNameFuncAssoc] = useState("");
+  const [dadosFunc, setDadosFunc] = useState(null);
+  const [disabledInputs, setDisabledInputs] = useState(false);
   const navigate = useNavigate();
-  const showModal = () => {
+  const dispatch = useDispatch();
+  const { role, nome } = useSelector((state) => state.auth.user);
+  const funcionariosState = useSelector((state) => state.auth.funcionarios);
+  const authState = useSelector((state) => state.auth);
+  const { isSuccess, isError, isLoading, message } = authState;
+  const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
+  // console.log([funcionariosState[0].projetosvinculados[0]].includes(projetosEmpresa[]?._id));
+  console.log(disabledInputs);
+
+  const showModal = (data) => {
+    data !== null ? setDisabledInputs(true) : setDisabledInputs(false);
+    setDadosFunc(data);
     setOpen(true);
   };
-  const showModalAssoc = () => {
+  const showModalAssoc = (e) => {
+    setNameFuncAssoc(e.nome);
+    if (message !== "PFS") {
+      dispatch(getAllFuncionariosProjetos(e.id));
+    }
+    if (!projetosEmpresa) {
+      dispatch(getProjetosEmpresa());
+    }
     setOpenAssoc(true);
   };
+  const handleOkSubmit = () => {};
+
   const handleOk = () => {
-    alert("O Augusto quer ser Homem");
-    setConfirmLoading(true);
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 2000);
+    toast.info("Você precisa ativar a edição para enviar");
   };
   const handleCancel = () => {
-    console.log("Clicked cancel button");
+    setDadosFunc(null);
+    setDisabledInputs(false);
     setOpen(false);
   };
   const handleOkAssoc = () => {
@@ -72,24 +119,133 @@ const ListagemFuncionarios = () => {
     setOpenAssoc(false);
   };
   const apontamentos = (e) => {
-    navigate(`apontamentos/${e.key}`)
-  }
+    navigate(`apontamentos/${e.key}`);
+  };
+
+  useEffect(() => {
+    if (funcionariosState.length == 0) {
+      dispatch(getAllFuncionariosEmpresa());
+    }
+  }, []);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      nome: dadosFunc !== null ? dadosFunc?.nome : "",
+      cpf: dadosFunc !== null ? dadosFunc?.cpf : "",
+      rg: dadosFunc !== null ? dadosFunc?.rg : "",
+      data_nascimento:
+        dadosFunc !== null
+          ? moment.utc(dadosFunc?.data_nascimento).format("DD/MM/YYYY")
+          : "",
+      data_admissao:
+        dadosFunc !== null
+          ? moment.utc(dadosFunc?.data_admissao).format("DD/MM/YYYY")
+          : "",
+      endereco: dadosFunc !== null ? dadosFunc?.endereco : "",
+      complemento: dadosFunc !== null ? dadosFunc?.complemento : "",
+      bairro: dadosFunc !== null ? dadosFunc?.bairro : "",
+      cep: dadosFunc !== null ? dadosFunc?.cep : "",
+      cidade: dadosFunc !== null ? dadosFunc?.cidade : "",
+      uf: dadosFunc !== null ? dadosFunc?.uf : "",
+      telefone: dadosFunc !== null ? dadosFunc?.telefone : "",
+      email: dadosFunc !== null ? dadosFunc?.email : "",
+      valor_remuneracao: dadosFunc !== null ? dadosFunc?.valor_remuneracao : "",
+      valor_horaextra: dadosFunc !== null ? dadosFunc?.valor_horaextra : "",
+      nome_banco: dadosFunc !== null ? dadosFunc?.nome_banco : "",
+      numero_banco: dadosFunc !== null ? dadosFunc?.numero_banco : "",
+      agencia: dadosFunc !== null ? dadosFunc?.agencia : "",
+      conta: dadosFunc !== null ? dadosFunc?.conta : "",
+      tipo_conta: dadosFunc !== null ? dadosFunc?.tipo_conta : "",
+      pix: dadosFunc !== null ? dadosFunc?.pix : "",
+      horario1: dadosFunc !== null ? dadosFunc?.horario1 : "",
+      horario2: dadosFunc !== null ? dadosFunc?.horario2 : "",
+      password: "",
+      observacoes: dadosFunc !== null ? dadosFunc?.observacoes : "",
+    },
+    validationSchema: schema,
+    onSubmit: (values) => {
+      alert(JSON.stringify(values))
+    },
+  });
+
   const data1 = [];
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < funcionariosState?.length; i++) {
     data1.push({
       key: i + 1,
-      nome: `Alisson Rhuan`,
-      cpf: "081.013.301-60",
-      telefone: `58445484`,
-      empresa: "Alisson LTDA",
+      id: funcionariosState[i]._id,
+      idempresa: funcionariosState[i].cod_empresa._id,
+      nome: funcionariosState[i].nome,
+      cpf: funcionariosState[i].cpf,
+      rg: funcionariosState[i].rg,
+      data_nascimento: funcionariosState[i].data_nascimento,
+      data_admissao: funcionariosState[i].data_admissao,
+      endereco: funcionariosState[i].endereco,
+      complemento: funcionariosState[i].complemento,
+      bairro: funcionariosState[i].bairro,
+      cep: funcionariosState[i].cep,
+      cidade: funcionariosState[i].cidade,
+      uf: funcionariosState[i].uf,
+      telefone: funcionariosState[i].telefone,
+      email: funcionariosState[i].email,
+      valor_remuneracao: funcionariosState[i].valor_remuneracao,
+      valor_horaextra: funcionariosState[i].valor_horaextra,
+      nome_banco: funcionariosState[i].nome_banco,
+      agencia: funcionariosState[i].agencia,
+      conta: funcionariosState[i].conta,
+      tipo_conta: funcionariosState[i].tipo_conta,
+      pix: funcionariosState[i].pix,
+      horario1: funcionariosState[i].horario1,
+      horario2: funcionariosState[i].horario2,
+      numero_banco: funcionariosState[i].numero_banco,
+      observacoes: funcionariosState[i].observacoes,
+      empresa: funcionariosState[i].cod_empresa.razaosocial,
       acoes: (
         <>
-          <button className="bg-transparent border-0 text-blue">
+          <button
+            onClick={() =>
+              showModal({
+                id: funcionariosState[i]._id,
+                idempresa: funcionariosState[i].cod_empresa._id,
+                nome: funcionariosState[i].nome,
+                cpf: funcionariosState[i].cpf,
+                rg: funcionariosState[i].rg,
+                data_nascimento: funcionariosState[i].data_nascimento,
+                data_admissao: funcionariosState[i].data_admissao,
+                endereco: funcionariosState[i].endereco,
+                complemento: funcionariosState[i].complemento,
+                bairro: funcionariosState[i].bairro,
+                cep: funcionariosState[i].cep,
+                cidade: funcionariosState[i].cidade,
+                uf: funcionariosState[i].uf,
+                telefone: funcionariosState[i].telefone,
+                email: funcionariosState[i].email,
+                valor_remuneracao: funcionariosState[i].valor_remuneracao,
+                valor_horaextra: funcionariosState[i].valor_horaextra,
+                nome_banco: funcionariosState[i].nome_banco,
+                agencia: funcionariosState[i].agencia,
+                conta: funcionariosState[i].conta,
+                tipo_conta: funcionariosState[i].tipo_conta,
+                pix: funcionariosState[i].pix,
+                horario1: funcionariosState[i].horario1,
+                horario2: funcionariosState[i].horario2,
+                numero_banco: funcionariosState[i].numero_banco,
+                observacoes: funcionariosState[i].observacoes,
+                empresa: funcionariosState[i].cod_empresa.razaosocial,
+              })
+            }
+            className="bg-transparent border-0 text-blue"
+          >
             <GrFormView className="fs-4" />
           </button>
           <button
             className="bg-transparent border-0 text-blue"
-            onClick={showModalAssoc}
+            onClick={() =>
+              showModalAssoc({
+                nome: funcionariosState[i].nome,
+                id: funcionariosState[i]._id,
+              })
+            }
           >
             <HiViewGridAdd className="fs-5" />
           </button>
@@ -127,7 +283,7 @@ const ListagemFuncionarios = () => {
             <div className="d-flex ">
               <button
                 className="btn btn-outline-primary mb-3"
-                onClick={showModal}
+                onClick={() => showModal(null)}
               >
                 Cadastrar Funcionário
               </button>
@@ -141,7 +297,7 @@ const ListagemFuncionarios = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
-                apontamentos(record)
+                apontamentos(record);
               },
             };
           }}
@@ -150,10 +306,12 @@ const ListagemFuncionarios = () => {
           rowClassName="custom-table-row"
         />
         <Modal
-          title="Cadastro de Funcionários"
+          title={
+            dadosFunc !== null ? "Dados da empresa" : "Cadastro de Funcionários"
+          }
           onCancel={handleCancel}
           open={open}
-          onOk={handleOk}
+          onOk={disabledInputs == false ? formik.handleSubmit : handleOk}
           confirmLoading={confirmLoading}
           maskClosable={false}
           width={"75%"}
@@ -161,36 +319,83 @@ const ListagemFuncionarios = () => {
             body: { overflowY: "auto", maxHeight: "calc(100vh - 200px)" },
           }}
         >
-          <form>
+          {dadosFunc !== null ? (
+            <div className="text-end buttonEditOnOFf">
+              <FaRegEdit
+                title={
+                  disabledInputs === false
+                    ? "Desabilitar Edição"
+                    : "Habilitar Edição"
+                }
+                onClick={() =>
+                  disabledInputs === false
+                    ? setDisabledInputs(true)
+                    : setDisabledInputs(false)
+                }
+                className={`${
+                  disabledInputs === false ? "bg-gray" : ""
+                } mb-2 buttonEditOnOff__button`}
+              />
+            </div>
+          ) : (
+            ""
+          )}
+          <form onSubmit={formik.handleSubmit}>
             <h4 className="border-bottom">Dados do Funcionário</h4>
             <div className="mb-3 d-flex gap-2">
               <div className="form-floating w-100">
                 <IMaskInput
                   type="text"
                   className="form-control formInput"
-                  id="cpf"
+                  id="nome"
                   placeholder="nome"
+                  name="nome"
+                  onChange={formik.handleChange("nome")}
+                  onBlur={formik.handleBlur("nome")}
+                  value={formik.values.nome}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="nome">Nome</label>
+                <div className="error">
+                  {formik.touched.nome && formik.errors.nome}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <IMaskInput
-                  type="date"
                   className="form-control formInput"
                   id="datanascimento"
+                  mask="00/00/0000"
+                  placeholder="DD/MM/YYYY"
+                  name="data_nascimento"
+                  onChange={formik.handleChange("data_nascimento")}
+                  onBlur={formik.handleBlur("data_nascimento")}
+                  value={formik.values.data_nascimento}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="datanascimento">Data de Nascimento</label>
+                <div className="error">
+                  {formik.touched.data_nascimento &&
+                    formik.errors.data_nascimento}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
               <div className="form-floating w-100">
                 <IMaskInput
+                  type="number"
                   className="form-control formInput"
-                  mask="000.000.000-00"
                   id="cpf"
                   placeholder="cpf"
+                  name="cpf"
+                  onChange={formik.handleChange("cpf")}
+                  onBlur={formik.handleBlur("cpf")}
+                  value={formik.values.cpf}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cpf">CPF</label>
+                <div className="error">
+                  {formik.touched.cpf && formik.errors.cpf}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -198,17 +403,33 @@ const ListagemFuncionarios = () => {
                   type="number"
                   id="rg"
                   placeholder="rg"
+                  name="rg"
+                  onChange={formik.handleChange("rg")}
+                  onBlur={formik.handleBlur("rg")}
+                  value={formik.values.rg}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="rg">RG</label>
+                <div className="error">
+                  {formik.touched.rg && formik.errors.rg}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="(00) 0 0000-0000"
+                  type="number"
                   id="telefone"
                   placeholder="telefone"
+                  name="telefone"
+                  onChange={formik.handleChange("telefone")}
+                  onBlur={formik.handleBlur("telefone")}
+                  value={formik.values.telefone}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
+                <div className="error">
+                  {formik.touched.telefone && formik.errors.telefone}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -218,8 +439,16 @@ const ListagemFuncionarios = () => {
                   type="text"
                   id="endereco"
                   placeholder="Endereço"
+                  name="endereco"
+                  onChange={formik.handleChange("endereco")}
+                  onBlur={formik.handleBlur("endereco")}
+                  value={formik.values.endereco}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="endereco">Endereço</label>
+                <div className="error">
+                  {formik.touched.endereco && formik.errors.endereco}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -227,8 +456,16 @@ const ListagemFuncionarios = () => {
                   type="text"
                   id="complemento"
                   placeholder="Complemento"
+                  name="complemento"
+                  onChange={formik.handleChange("complemento")}
+                  onBlur={formik.handleBlur("complemento")}
+                  value={formik.values.complemento}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="complemento">Complemento</label>
+                <div className="error">
+                  {formik.touched.complemento && formik.errors.complemento}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -238,30 +475,49 @@ const ListagemFuncionarios = () => {
                   type="text"
                   id="bairro"
                   placeholder="Bairro"
+                  name="bairro"
+                  onChange={formik.handleChange("bairro")}
+                  onBlur={formik.handleBlur("bairro")}
+                  value={formik.values.bairro}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="bairro">Bairro</label>
+                <div className="error">
+                  {formik.touched.bairro && formik.errors.bairro}
+                </div>
               </div>
               <div className="form-floating w-75">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="00000-000"
+                  type="number"
                   id="cep"
+                  name="cep"
+                  onChange={formik.handleChange("cep")}
+                  onBlur={formik.handleBlur("cep")}
+                  value={formik.values.cep}
+                  disabled={disabledInputs === true ? true : false}
                   placeholder="Cep"
                 />
                 <label htmlFor="cep">Cep</label>
+                <div className="error">
+                  {formik.touched.cep && formik.errors.cep}
+                </div>
               </div>
               <div className="form-floating w-100">
-                <select
-                  class="form-select formInput"
-                  aria-label="Default select example"
+                <IMaskInput
+                  className="form-control formInput"
                   id="cidade"
                   name="cidade"
-                >
-                  <option selected>Cidade</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
+                  onChange={formik.handleChange("cidade")}
+                  onBlur={formik.handleBlur("cidade")}
+                  value={formik.values.cidade}
+                  disabled={disabledInputs === true ? true : false}
+                  placeholder="Cidade"
+                />
+                <label htmlFor="cidade">Cidade</label>
+                <div className="error">
+                  {formik.touched.cidade && formik.errors.cidade}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <select
@@ -269,23 +525,62 @@ const ListagemFuncionarios = () => {
                   aria-label="Default select example"
                   id="uf"
                   name="uf"
+                  onChange={formik.handleChange("uf")}
+                  onBlur={formik.handleBlur("uf")}
+                  value={formik.values.uf}
+                  disabled={disabledInputs === true ? true : false}
                 >
                   <option selected>UF</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value="MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
                 </select>
+                <div className="error">
+                  {formik.touched.uf && formik.errors.uf}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
               <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
-                  mask="(00) 0 0000-0000"
+                  type="number"
                   id="telefone"
                   placeholder="Telefone"
+                  name="telefone"
+                  onChange={formik.handleChange("telefone")}
+                  onBlur={formik.handleBlur("telefone")}
+                  value={formik.values.telefone}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
+                <div className="error">
+                  {formik.touched.telefone && formik.errors.telefone}
+                </div>
               </div>
               <div className="form-floating w-100">
                 <IMaskInput
@@ -293,17 +588,33 @@ const ListagemFuncionarios = () => {
                   type="email"
                   id="email"
                   placeholder="Email"
+                  name="email"
+                  onChange={formik.handleChange("email")}
+                  onBlur={formik.handleBlur("email")}
+                  value={formik.values.email}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="email">Email</label>
+                <div className="error">
+                  {formik.touched.email && formik.errors.email}
+                </div>
               </div>
               <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
-                  type="date"
                   id="dataadmissao"
                   placeholder="Data de Admissão"
+                  name="data_admissao"
+                  mask="00/00/0000"
+                  onChange={formik.handleChange("data_admissao")}
+                  onBlur={formik.handleBlur("data_admissao")}
+                  value={formik.values.data_admissao}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="dataadmissao">Data de Admissão</label>
+                <div className="error">
+                  {formik.touched.data_admissao && formik.errors.data_admissao}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -313,8 +624,17 @@ const ListagemFuncionarios = () => {
                   type="number"
                   id="valorremuneracao"
                   placeholder="Remuneração R$"
+                  name="valor_remuneracao"
+                  onChange={formik.handleChange("valor_remuneracao")}
+                  onBlur={formik.handleBlur("valor_remuneracao")}
+                  value={formik.values.valor_remuneracao}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="valorremuneracao">Remuneração R$</label>
+                <div className="error">
+                  {formik.touched.valor_remuneracao &&
+                    formik.errors.valor_remuneracao}
+                </div>
               </div>
               <div className="form-floating w-50">
                 <IMaskInput
@@ -322,8 +642,17 @@ const ListagemFuncionarios = () => {
                   type="number"
                   id="valorhoraextra"
                   placeholder="Hora Extra R$"
+                  name="valor_horaextra"
+                  onChange={formik.handleChange("valor_horaextra")}
+                  onBlur={formik.handleBlur("valor_horaextra")}
+                  value={formik.values.valor_horaextra}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="valorhoraextra">Hora Extra R$</label>
+                <div className="error">
+                  {formik.touched.valor_horaextra &&
+                    formik.errors.valor_horaextra}
+                </div>
               </div>
             </div>
             <h4 className="border-bottom">Informações Bancarias</h4>
@@ -333,24 +662,37 @@ const ListagemFuncionarios = () => {
                   class="form-select formInput"
                   aria-label="Default select example"
                   id="banco"
-                  name="banco"
+                  name="nome_banco"
+                  onChange={formik.handleChange("nome_banco")}
+                  onBlur={formik.handleBlur("nome_banco")}
+                  value={formik.values.nome_banco}
+                  disabled={disabledInputs === true ? true : false}
                 >
                   <option selected>Banco</option>
                   <option value="1">Itaú</option>
                   <option value="2">Santander</option>
                   <option value="3">Banco do Brasil</option>
                 </select>
+                <div className="error">
+                  {formik.touched.nome_banco && formik.errors.nome_banco}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <IMaskInput
                   className="form-control formInput"
                   type="number"
-                  value="002"
                   disabled
                   id="numerobanco"
                   placeholder="Numero do Banco"
+                  name="numero_banco"
+                  onChange={formik.handleChange("numero_banco")}
+                  onBlur={formik.handleBlur("numero_banco")}
+                  value={formik.values.numero_banco}
                 />
                 <label htmlFor="numerobanco">Numero do Banco</label>
+                <div className="error">
+                  {formik.touched.numero_banco && formik.errors.numero_banco}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <IMaskInput
@@ -358,8 +700,16 @@ const ListagemFuncionarios = () => {
                   type="number"
                   id="agencia"
                   placeholder="Agência"
+                  name="agencia"
+                  onChange={formik.handleChange("agencia")}
+                  onBlur={formik.handleBlur("agencia")}
+                  value={formik.values.agencia}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="agencia">Agência</label>
+                <div className="error">
+                  {formik.touched.agencia && formik.errors.agencia}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <IMaskInput
@@ -367,21 +717,36 @@ const ListagemFuncionarios = () => {
                   type="number"
                   id="conta"
                   placeholder="Conta"
+                  name="conta"
+                  onChange={formik.handleChange("conta")}
+                  onBlur={formik.handleBlur("conta")}
+                  value={formik.values.conta}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="conta">Conta</label>
+                <div className="error">
+                  {formik.touched.conta && formik.errors.conta}
+                </div>
               </div>
               <div className="form-floating w-25">
                 <select
                   class="form-select formInput"
                   aria-label="Default select example"
                   id="tipoconta"
-                  name="tipoconta"
+                  name="tipo_conta"
+                  onChange={formik.handleChange("tipo_conta")}
+                  onBlur={formik.handleBlur("tipo_conta")}
+                  value={formik.values.tipo_conta}
+                  disabled={disabledInputs === true ? true : false}
                 >
                   <option selected>Tipo da Conta</option>
-                  <option value="1">Corrente</option>
-                  <option value="2">Poupança</option>
-                  <option value="3">Salário</option>
+                  <option value="corrente">Corrente</option>
+                  <option value="poupanca">Poupança</option>
+                  <option value="salario">Salário</option>
                 </select>
+                <div className="error">
+                  {formik.touched.tipo_conta && formik.errors.tipo_conta}
+                </div>
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
@@ -391,23 +756,38 @@ const ListagemFuncionarios = () => {
                   type="text"
                   id="pix"
                   placeholder="Pix"
+                  name="pix"
+                  onChange={formik.handleChange("pix")}
+                  onBlur={formik.handleBlur("pix")}
+                  value={formik.values.pix}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="pix">Pix</label>
+                <div className="error">
+                  {formik.touched.pix && formik.errors.pix}
+                </div>
               </div>
-              <div className="form-floating w-25">
+              {/* <div className="form-floating w-25">
                 <select
                   class="form-select formInput"
                   aria-label="Default select example"
                   id="tipopix"
                   name="tipopix"
+                  onChange={formik.handleChange("tipopix")}
+                  onBlur={formik.handleBlur("tipopix")}
+                  value={formik.values.tipopix}
+                  disabled={disabledInputs === true ? true : false}
                 >
                   <option selected>Tipo da Chave Pix</option>
-                  <option value="1">Telefone</option>
-                  <option value="2">Aleatória</option>
-                  <option value="3">Cpf</option>
-                  <option value="3">Email</option>
+                  <option value="telefone">Telefone</option>
+                  <option value="aleatoria">Aleatória</option>
+                  <option value="cpf">Cpf</option>
+                  <option value="email">Email</option>
                 </select>
-              </div>
+                <div className="error">
+                  {formik.touched.tipopix && formik.errors.tipopix}
+                </div>
+              </div> */}
             </div>
             <h4 className="border-bottom">Outros Dados</h4>
             <div className="d-flex mb-3 gap-2">
@@ -417,6 +797,11 @@ const ListagemFuncionarios = () => {
                   mask="00:00 - 00:00"
                   id="horario1"
                   placeholder="Horário Manhã"
+                  name="horario1"
+                  onChange={formik.handleChange("horario1")}
+                  onBlur={formik.handleBlur("horario1")}
+                  value={formik.values.horario1}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="horario1">Horário Manhã</label>
               </div>
@@ -426,20 +811,33 @@ const ListagemFuncionarios = () => {
                   mask="00:00 - 00:00"
                   id="horario2"
                   placeholder="Horário Tarde"
+                  name="horario2"
+                  onChange={formik.handleChange("horario2")}
+                  onBlur={formik.handleBlur("horario2")}
+                  value={formik.values.horario2}
+                  disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="horario2">Horário Tarde</label>
               </div>
-              <div className="form-floating w-50">
-                <Space direction="vertical" />
-                <Input.Password
-                  className="formInput"
-                  id="password"
-                  placeholder="Senha de Acesso"
-                  iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </div>
+              {dadosFunc !== null ? (
+                ""
+              ) : (
+                <div className="form-floating w-50">
+                  <Space direction="vertical" />
+                  <Input.Password
+                    className="formInput"
+                    id="password"
+                    name="password"
+                    onChange={formik.handleChange("password")}
+                    onBlur={formik.handleBlur("password")}
+                    value={formik.values.password}
+                    placeholder="Senha de Acesso"
+                    iconRender={(visible) =>
+                      visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                    }
+                  />
+                </div>
+              )}
             </div>
             <div className="d-flex mb-3 gap-2">
               <div class="form-floating w-100">
@@ -448,6 +846,11 @@ const ListagemFuncionarios = () => {
                   placeholder="Insira as Observações"
                   id="observacoes"
                   style={{ height: "100px", resize: "none" }}
+                  name="observacoes"
+                  onChange={formik.handleChange("observacoes")}
+                  onBlur={formik.handleBlur("observacoes")}
+                  value={formik.values.observacoes}
+                  disabled={disabledInputs === true ? true : false}
                 ></textarea>
                 <label for="observacoes">Observações</label>
               </div>
@@ -470,66 +873,33 @@ const ListagemFuncionarios = () => {
                   <h5 className="fs-5 me-2">Funcionário</h5>
                 </div>
                 <div className="w-100">
-                  <h5 className="text-center">Manuel da Silva</h5>
+                  <h5 className="text-center">{nameFuncAssoc}</h5>
                 </div>
               </div>
             </div>
             <br />
-            <div className="tabelaAssoc_linhas w-100 ">
+            {projetosEmpresa?.map((item, index) => (
+              <div
+                key={index}
+                className={`${
+                  index !== 0 ? "tabelaAssoc_linhas_" : ""
+                } tabelaAssoc_linhas w-100 `}
+              >
                 <div className="d-flex">
                   <div className="linha">
                     <h5 className="fs-5 me-5 mt-1">Projeto</h5>
                   </div>
                   <div className="w-75">
-                    <h6 className="text-projetos">Apostas esportivas</h6>
+                    <h6 className="text-projetos">
+                      {item.nome == "Teste1" ? `${item.nome} teste` : item.nome}
+                    </h6>
                   </div>
-                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
+                  <div className="fs-5">
+                    <span style={{ cursor: "pointer" }}>[]</span>
+                  </div>
                 </div>
-            </div>
-            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
-                <div className="d-flex">
-                  <div className="linha">
-                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
-                  </div>
-                  <div className="w-75">
-                    <h6 className="text-projetos">Nota Fiscal Eletrônica</h6>
-                  </div>
-                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
-                </div>
-            </div>
-            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
-                <div className="d-flex">
-                  <div className="linha">
-                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
-                  </div>
-                  <div className="w-75">
-                    <h6 className="text-projetos">Ecommerce</h6>
-                  </div>
-                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
-                </div>
-            </div>
-            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
-                <div className="d-flex">
-                  <div className="linha">
-                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
-                  </div>
-                  <div className="w-75">
-                    <h6 className="text-projetos">Streaming</h6>
-                  </div>
-                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
-                </div>
-            </div>
-            <div style={{borderTop: "1px solid transparent"}} className="tabelaAssoc_linhas w-100 ">
-                <div className="d-flex">
-                  <div className="linha">
-                    <h5 className="fs-5 me-5 mt-1">Projeto</h5>
-                  </div>
-                  <div className="w-75">
-                    <h6 className="text-projetos">Ponto Eletrônico</h6>
-                  </div>
-                  <div className="fs-5"><span style={{cursor: "pointer"}}>[    ]</span></div>
-                </div>
-            </div>
+              </div>
+            ))}
           </div>
         </Modal>
       </div>

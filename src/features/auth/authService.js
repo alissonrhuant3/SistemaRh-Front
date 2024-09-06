@@ -36,10 +36,32 @@ const associarFuncionarioProjeto = async (data) => {
   return response.data;
 };
 
+const registerPonto = async (data) => {
+    const response = await axios.post(`${base_url}/funcionario/horainicialam`, {projetoId: data.projeto, tarefa: data.projeto}, config)
+    return response.data;
+}
+
+const createFuncionario = async (data) => {
+  const response = await axios.post(`${base_url}/funcionario/registrar/`,data, config);
+  return response.data;
+};
+
+const updateFuncionario = async (data) => {
+  const response = await axios.put(`${base_url}/funcionario/edit-funcionario/${data.id}`,data.data, config);
+  return response.data;
+};
+
 const desassociarFuncionarioProjeto = async (data) => {
   const response = await axios.delete(`${base_url}/funcionario/delete-associacao/`,data, config);
   return response.data;
 };
+
+const deleteFuncionario = async (id) => {
+  const response = await axios.delete(`${base_url}/funcionario/delete-funcionario/${id}`, config)
+  return response.data;
+}
+
+
 
 const authService = {
   login,
@@ -47,7 +69,11 @@ const authService = {
   getAllFuncionariosEmpresa,
   getAllFuncionarioProjetos,
   associarFuncionarioProjeto,
-  desassociarFuncionarioProjeto
+  desassociarFuncionarioProjeto,
+  createFuncionario,
+  updateFuncionario,
+  deleteFuncionario,
+  registerPonto,
 };
 
 export default authService;

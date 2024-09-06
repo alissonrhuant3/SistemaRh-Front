@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import authService from "./authService";
 
 const getUserfromLocalStorage = localStorage.getItem("user")
@@ -59,6 +59,28 @@ export const getAllFuncionariosProjetos = createAsyncThunk(
   }
 );
 
+export const createFuncionario = createAsyncThunk(
+  "/auth/create-funcionario",
+  async (data,thunkAPI) => {
+    try {
+      return await authService.createFuncionario(data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const updateFuncionario = createAsyncThunk(
+  "/auth/update-funcionario",
+  async (data,thunkAPI) => {
+    try {
+      return await authService.updateFuncionario(data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const associarProjeto = createAsyncThunk(
   "/auth/associar-funcionario-projeto",
   async (data,thunkAPI) => {
@@ -80,6 +102,30 @@ export const desassociarProjeto = createAsyncThunk(
     }
   }
 );
+
+export const deleteFuncionario = createAsyncThunk(
+  "/auth/delete-funcionario",
+  async (id,thunkAPI) => {
+    try {
+      return await authService.deleteFuncionario(id);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const registerPontoFuncionario = createAsyncThunk(
+  "/auth/registrar-ponto-funcionario",
+  async (data,{rejectWithValue}) => {
+    try {
+      return await authService.registerPonto(data);
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const resetState = createAction("Reset_all");
 
 export const authSlice = createSlice({
   name: "auth",
@@ -199,6 +245,83 @@ export const authSlice = createSlice({
         state.isError = true,
         state.message = action.error;
       })
+      .addCase(createFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.createdFuncionario = action.payload;
+        state.message = "Funcionario criado com Sucesso"
+      })
+      .addCase(createFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
+      .addCase(updateFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.updatedFuncionario = action.payload;
+        state.message = "Funcionario atualizado com Sucesso"
+      })
+      .addCase(updateFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
+      .addCase(deleteFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.deletedFuncionario = action.payload;
+        state.message = "Funcionario deletado com Sucesso"
+      })
+      .addCase(deleteFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
+      .addCase(registerPontoFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(registerPontoFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.ponto = action.payload;
+        state.message = "Ponto registrado com Sucesso"
+      })
+      .addCase(registerPontoFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.payload || action.error.message;;
+      })
+      .addCase(resetState, () => initialState);
   },
 });
 

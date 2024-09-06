@@ -2,6 +2,7 @@ import React from "react";
 import { Table } from "antd";
 import { GrFormView } from "react-icons/gr";
 import { AiFillDelete } from "react-icons/ai";
+import { useLocation } from "react-router-dom";
 
 const columns = [
   {
@@ -53,8 +54,15 @@ const columns = [
     dataIndex: "gestor",
   },
 ];
-const data1 = [];
-for (let i = 0; i < 25; i++) {
+
+
+const Apontamentos = () => {
+  const location = useLocation();
+  const getFuncID = location.pathname.split("/")[4];
+  console.log(getFuncID);
+
+  const data1 = [];
+  for (let i = 0; i < 25; i++) {
   data1.push({
     data: "7/4/2024",
     diasemana: `Segunda`,
@@ -69,9 +77,8 @@ for (let i = 0; i < 25; i++) {
     hefim: "23:00",
     gestor: "X",
   });
-}
-
-const Apontamentos = () => {
+  } 
+  
   return (
     <>
       <div className="tabelaAssoc_linhas w-100 apontamentos">
@@ -90,7 +97,6 @@ const Apontamentos = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
-                console.log(record);
               },
             };
           }}

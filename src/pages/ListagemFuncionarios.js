@@ -9,34 +9,43 @@ import { HiViewGridAdd } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  createFuncionario,
+  deleteFuncionario,
   getAllFuncionarios,
   getAllFuncionariosEmpresa,
   getAllFuncionariosProjetos,
+  resetState,
+  updateFuncionario,
 } from "../features/auth/authSlice";
 import { getProjetosEmpresa } from "../features/empresas/empresaSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import CustomModal from "../components/CustomModal";
 const moment = require("moment");
 
 let schema = Yup.object().shape({
   nome: Yup.string().required("Nome é obrigatório!"),
-  cpf: Yup.number().required("CPF é obrigatório!"),
+  cpf: Yup.string().matches(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos.").required("CPF é obrigatório!"),
   rg: Yup.number().required("RG é obrigatório!"),
   data_nascimento: Yup.string().required("Data de nascimento é obrigatória!"),
   endereco: Yup.string().required("Endereço é obrigatório!"),
   bairro: Yup.string().required("Bairro é obrigatório!"),
-  cep: Yup.number().required("CEP é obrigatório!"),
+  cep: Yup.string().matches(/^\d{8}$/, "CEP deve ter 8 dígitos numéricos.").required("CEP é obrigatório!"),
   cidade: Yup.string().required("Cidade é obrigatória!"),
   uf: Yup.string().required("UF é obrigatório!"),
-  telefone: Yup.number().required("Telefone é obrigatório!"),
+  telefone: Yup.string().matches(/^\d{11}$/, "Telefone deve ter 11 dígitos numéricos.").required("Telefone é obrigatório!"),
   email: Yup.string().email("Email inválido!").required("Email é obrigatório!"),
   data_admissao: Yup.string().required("Data de admissão é obrigatório!"),
-  valor_remuneracao: Yup.number().required("Valor de remuneração é obrigatório!"),
+  numero_banco: Yup.string().matches(/^\d{3}$/, "Código do banco deve ter 3 dígitos numéricos.").required("Código do banco é obrigatório!"),
+  valor_remuneracao: Yup.number().required(
+    "Valor de remuneração é obrigatório!"
+  ),
   nome_banco: Yup.string().required("Nome do banco é obrigatório!"),
   agencia: Yup.number().required("Agência é obrigatória!"),
   conta: Yup.string().required("Conta é obrigatória!"),
   tipo_conta: Yup.string().required("Tipo de conta é obrigatório!"),
+  
   // tipo_pix: Yup.string().required("Tipo de chave pix é obrigatório!"),
 });
 
@@ -66,20 +75,24 @@ const columns = [
 const ListagemFuncionarios = () => {
   const [open, setOpen] = useState(false);
   const [openAssoc, setOpenAssoc] = useState(false);
+  const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmLoadingAssoc, setConfirmLoadingAssoc] = useState(false);
   const [nameFuncAssoc, setNameFuncAssoc] = useState("");
   const [dadosFunc, setDadosFunc] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
+  const [funcionarioId, setFuncionarioId] = useState(0);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { role, nome } = useSelector((state) => state.auth.user);
   const funcionariosState = useSelector((state) => state.auth.funcionarios);
   const authState = useSelector((state) => state.auth);
-  const { isSuccess, isError, isLoading, message } = authState;
+  const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario } = authState;
   const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
   // console.log([funcionariosState[0].projetosvinculados[0]].includes(projetosEmpresa[]?._id));
-  console.log(disabledInputs);
+
+  
 
   const showModal = (data) => {
     data !== null ? setDisabledInputs(true) : setDisabledInputs(false);
@@ -96,12 +109,13 @@ const ListagemFuncionarios = () => {
     }
     setOpenAssoc(true);
   };
-  const handleOkSubmit = () => {};
 
   const handleOk = () => {
     toast.info("Você precisa ativar a edição para enviar");
   };
   const handleCancel = () => {
+    formik.resetForm()
+    setConfirmLoading(false);
     setDadosFunc(null);
     setDisabledInputs(false);
     setOpen(false);
@@ -118,9 +132,58 @@ const ListagemFuncionarios = () => {
     console.log("Clicked cancel button");
     setOpenAssoc(false);
   };
-  const apontamentos = (e) => {
-    navigate(`apontamentos/${e.key}`);
+
+  const showModalConfirm = (e) => {
+    setFuncionarioId(e)
+    setOpenModalConfirm(true);
   };
+  const closeModalConfirm = () => {
+    setFuncionarioId(0);
+    setOpenModalConfirm(false);
+  };
+
+  const apontamentos = (e) => {
+    navigate(`apontamentos/${e.id}`);
+  };
+
+  useEffect(() => {
+    if (isSuccess && updatedFuncionario) {
+      setTimeout(() => {
+        toast.success("Dados do funcionario atualizados com Sucesso!");
+        dispatch(resetState());
+        dispatch(getAllFuncionariosEmpresa());
+      }, 300);
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        setDadosFunc(null);
+        formik.resetForm();
+      }, 2000);
+    } else if (isSuccess && createdFuncionario) {
+      setTimeout(() => {
+        toast.success("Funcionário cadastrado com Sucesso!");
+        dispatch(resetState());
+        dispatch(getAllFuncionariosEmpresa());
+      }, 300)
+      setTimeout(() => {
+        setOpen(false);
+        setConfirmLoading(false);
+        formik.resetForm();
+      }, 2000);
+    } else if (isSuccess && deletedFuncionario) {
+      setTimeout(() => {
+        toast.success("Funcionário deletado com Sucesso!");
+        setOpenModalConfirm(false);
+        dispatch(resetState());
+        dispatch(getAllFuncionariosEmpresa());
+      }, 300)
+    } else if (isError) {
+      setTimeout(() => {
+        toast.error("Algo deu errado!");
+        setConfirmLoading(false);
+      }, 1000);
+    }
+  }, [isSuccess, isError, isLoading, message, updatedFuncionario, createdFuncionario, deletedFuncionario]);
 
   useEffect(() => {
     if (funcionariosState.length == 0) {
@@ -135,13 +198,9 @@ const ListagemFuncionarios = () => {
       cpf: dadosFunc !== null ? dadosFunc?.cpf : "",
       rg: dadosFunc !== null ? dadosFunc?.rg : "",
       data_nascimento:
-        dadosFunc !== null
-          ? moment.utc(dadosFunc?.data_nascimento).format("DD/MM/YYYY")
-          : "",
+        dadosFunc !== null ? dadosFunc?.data_nascimento : "",
       data_admissao:
-        dadosFunc !== null
-          ? moment.utc(dadosFunc?.data_admissao).format("DD/MM/YYYY")
-          : "",
+        dadosFunc !== null ? dadosFunc?.data_admissao : "",
       endereco: dadosFunc !== null ? dadosFunc?.endereco : "",
       complemento: dadosFunc !== null ? dadosFunc?.complemento : "",
       bairro: dadosFunc !== null ? dadosFunc?.bairro : "",
@@ -160,12 +219,20 @@ const ListagemFuncionarios = () => {
       pix: dadosFunc !== null ? dadosFunc?.pix : "",
       horario1: dadosFunc !== null ? dadosFunc?.horario1 : "",
       horario2: dadosFunc !== null ? dadosFunc?.horario2 : "",
+      horaextra: dadosFunc !== null ? dadosFunc?.horaextra : false,
       password: "",
       observacoes: dadosFunc !== null ? dadosFunc?.observacoes : "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values))
+      if(dadosFunc !== null) {
+        setConfirmLoading(true)
+        dispatch(updateFuncionario({id: dadosFunc.id, data: values}))
+      } else {
+        setConfirmLoading(true)
+        dispatch(createFuncionario(values))
+      }
+      
     },
   });
 
@@ -249,12 +316,21 @@ const ListagemFuncionarios = () => {
           >
             <HiViewGridAdd className="fs-5" />
           </button>
-          <button className="bg-transparent border-0 text-danger">
+          <button onClick={() => showModalConfirm(funcionariosState[i]._id)} className="bg-transparent border-0 text-danger">
             <AiFillDelete className="fs-5" />
           </button>
         </>
       ),
     });
+  }
+
+  const handleSelectChange = (event) => {
+    const selectedValue = event.target.value;
+    console.log(selectedValue);
+  };
+
+  const deleteAFuncionario = (id) => {
+    dispatch(deleteFuncionario(id))
   }
 
   return (
@@ -297,6 +373,8 @@ const ListagemFuncionarios = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
+                console.log(record);
+                
                 apontamentos(record);
               },
             };
@@ -305,6 +383,9 @@ const ListagemFuncionarios = () => {
           dataSource={data1}
           rowClassName="custom-table-row"
         />
+        <CustomModal hideModal={closeModalConfirm} open={openModalConfirm} performAction={() => {
+          deleteAFuncionario(funcionarioId)
+        }} title="Você tem certeza que deseja deletar essa empresa?"/>
         <Modal
           title={
             dadosFunc !== null ? "Dados da empresa" : "Cadastro de Funcionários"
@@ -364,8 +445,7 @@ const ListagemFuncionarios = () => {
                 <IMaskInput
                   className="form-control formInput"
                   id="datanascimento"
-                  mask="00/00/0000"
-                  placeholder="DD/MM/YYYY"
+                  mask="00-00-0000"
                   name="data_nascimento"
                   onChange={formik.handleChange("data_nascimento")}
                   onBlur={formik.handleBlur("data_nascimento")}
@@ -382,14 +462,15 @@ const ListagemFuncionarios = () => {
             <div className="d-flex mb-3 gap-2">
               <div className="form-floating w-100">
                 <IMaskInput
-                  type="number"
+                  type="text"
+                  mask="00000000000"
                   className="form-control formInput"
                   id="cpf"
                   placeholder="cpf"
                   name="cpf"
                   onChange={formik.handleChange("cpf")}
                   onBlur={formik.handleBlur("cpf")}
-                  value={formik.values.cpf}
+                  value={formik.values.cpf ? String(formik.values.cpf) : ""} 
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="cpf">CPF</label>
@@ -400,13 +481,14 @@ const ListagemFuncionarios = () => {
               <div className="form-floating w-100">
                 <IMaskInput
                   className="form-control formInput"
-                  type="number"
+                  type="text"
+                  mask="0000000000"
                   id="rg"
                   placeholder="rg"
                   name="rg"
                   onChange={formik.handleChange("rg")}
                   onBlur={formik.handleBlur("rg")}
-                  value={formik.values.rg}
+                  value={formik.values.rg ? String(formik.values.rg) : ""}
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="rg">RG</label>
@@ -417,13 +499,14 @@ const ListagemFuncionarios = () => {
               <div className="form-floating w-100">
                 <IMaskInput
                   className="form-control formInput"
-                  type="number"
+                  type="text"
+                  mask="00900000000"
                   id="telefone"
                   placeholder="telefone"
                   name="telefone"
                   onChange={formik.handleChange("telefone")}
                   onBlur={formik.handleBlur("telefone")}
-                  value={formik.values.telefone}
+                  value={formik.values.telefone ? String(formik.values.telefone) : ""}
                   disabled={disabledInputs === true ? true : false}
                 />
                 <label htmlFor="telefone">Telefone</label>
@@ -489,12 +572,13 @@ const ListagemFuncionarios = () => {
               <div className="form-floating w-75">
                 <IMaskInput
                   className="form-control formInput"
-                  type="number"
+                  type="text"
+                  mask="00000000"
                   id="cep"
                   name="cep"
                   onChange={formik.handleChange("cep")}
                   onBlur={formik.handleBlur("cep")}
-                  value={formik.values.cep}
+                  value={formik.values.cep ? String(formik.values.cep) : ""}
                   disabled={disabledInputs === true ? true : false}
                   placeholder="Cep"
                 />
@@ -605,7 +689,7 @@ const ListagemFuncionarios = () => {
                   id="dataadmissao"
                   placeholder="Data de Admissão"
                   name="data_admissao"
-                  mask="00/00/0000"
+                  mask="00-00-0000"
                   onChange={formik.handleChange("data_admissao")}
                   onBlur={formik.handleBlur("data_admissao")}
                   value={formik.values.data_admissao}
@@ -654,10 +738,25 @@ const ListagemFuncionarios = () => {
                     formik.errors.valor_horaextra}
                 </div>
               </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="horaextra"
+                  onChange={(e) => formik.setFieldValue("horaextra", e.target.checked)}
+                  onBlur={formik.handleBlur}
+                  checked={formik.values.horaextra}
+                  id="flexCheckDefault"
+                  disabled={disabledInputs === true ? true : false}
+                />
+                <label class="form-check-label" for="flexCheckDefault">
+                  Ativar Hora extra
+                </label>
+              </div>
             </div>
             <h4 className="border-bottom">Informações Bancarias</h4>
             <div className="d-flex mb-3 gap-2">
-              <div className="form-floating w-50">
+              <div className="form-floating w-25">
                 <select
                   class="form-select formInput"
                   aria-label="Default select example"
@@ -669,9 +768,9 @@ const ListagemFuncionarios = () => {
                   disabled={disabledInputs === true ? true : false}
                 >
                   <option selected>Banco</option>
-                  <option value="1">Itaú</option>
-                  <option value="2">Santander</option>
-                  <option value="3">Banco do Brasil</option>
+                  <option value="itau">Itaú</option>
+                  <option value="santander">Santander</option>
+                  <option value="bancodobrasil">Banco do Brasil</option>
                 </select>
                 <div className="error">
                   {formik.touched.nome_banco && formik.errors.nome_banco}
@@ -680,16 +779,17 @@ const ListagemFuncionarios = () => {
               <div className="form-floating w-25">
                 <IMaskInput
                   className="form-control formInput"
-                  type="number"
-                  disabled
+                  type="text"
+                  mask="000"
                   id="numerobanco"
                   placeholder="Numero do Banco"
                   name="numero_banco"
                   onChange={formik.handleChange("numero_banco")}
                   onBlur={formik.handleBlur("numero_banco")}
-                  value={formik.values.numero_banco}
+                  value={formik.values.numero_banco ? String(formik.values.numero_banco) : ""}
+                  disabled={disabledInputs === true ? true : false}
                 />
-                <label htmlFor="numerobanco">Numero do Banco</label>
+                <label htmlFor="numerobanco">Código do Banco</label>
                 <div className="error">
                   {formik.touched.numero_banco && formik.errors.numero_banco}
                 </div>
@@ -750,7 +850,7 @@ const ListagemFuncionarios = () => {
               </div>
             </div>
             <div className="d-flex mb-3 gap-2">
-              <div className="form-floating w-75">
+              <div className="form-floating w-50">
                 <IMaskInput
                   className="form-control formInput"
                   type="text"
@@ -836,6 +936,9 @@ const ListagemFuncionarios = () => {
                       visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                     }
                   />
+                  <div className="error">
+                    {formik.touched.password && formik.errors.password}
+                  </div>
                 </div>
               )}
             </div>

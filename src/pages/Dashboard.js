@@ -50,8 +50,10 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    if (isError && message === "Error: Você já bateu o ponto de saída!") {
-      toast.error("Você já bateu o ponto de saída!")
+    if (isError) {
+      toast.error(`${message}`)
+    } else if (isSuccess && message === "Ponto registrado com Sucesso") {
+      toast.success("Ponto registrado com sucesso")
     }
   }, [isSuccess, isLoading, isError, message]);
 
@@ -76,7 +78,16 @@ const Dashboard = () => {
   return (
     <>
       <div className="d-flex justify-content-between w-100 h-100 inicio">
-        <div></div>
+        <div className="mt-2 ms-2 inicio_instrucoes bg-white">
+          <h3 className="text-center text-info fs-2 mt-1">Instruções</h3>
+          <div className="ms-2">
+            <p className="fs-3 border-bottom">* Regras para registro de ponto: </p>
+            <li className="fs-5">Horário de entrada manhã: 08:00 até 09:30</li>
+            <li className="fs-5">Horário de saída manhã: 09:30 até 12:10</li>
+            <li className="fs-5">Horário de entrada tarde: 12:10 até 14:10</li>
+            <li className="fs-5">Horário de saída tarde: 14:10 até 18:00</li>
+          </div>
+        </div>
         <div className="clock m-3">
           <div className="clock__space-button">
             <div className="clock__button"></div>

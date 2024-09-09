@@ -32,12 +32,12 @@ const getAllFuncionarioProjetos = async (id) => {
 };
 
 const associarFuncionarioProjeto = async (data) => {
-  const response = await axios.post(`${base_url}/funcionario/associar-projeto/`,data, config);
+  const response = await axios.post(`${base_url}/funcionario/associar-projeto/`,{projetoId: data.idProjeto, funcionarioId: data.idFuncionario}, config);
   return response.data;
 };
 
 const registerPonto = async (data) => {
-    const response = await axios.post(`${base_url}/funcionario/horainicialam`, {projetoId: data.projeto, tarefa: data.projeto}, config)
+    const response = await axios.post(`${base_url}/funcionario/horainicialam`, {projetoId: data.projeto, tarefa: data.tarefa}, config)
     return response.data;
 }
 

@@ -83,11 +83,11 @@ export const updateFuncionario = createAsyncThunk(
 
 export const associarProjeto = createAsyncThunk(
   "/auth/associar-funcionario-projeto",
-  async (data,thunkAPI) => {
+  async (data,{rejectWithValue}) => {
     try {
       return await authService.associarFuncionarioProjeto(data);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -218,6 +218,7 @@ export const authSlice = createSlice({
         state.isError = false;
         // eslint-disable-next-line no-unused-expressions
         state.isSuccess = true,
+        state.assoc = action.payload;
         state.message = "Associado com Sucesso"
       })
       .addCase(associarProjeto.rejected, (state, action) => {
@@ -225,7 +226,7 @@ export const authSlice = createSlice({
         state.isLoading = false,
         state.isSuccess = false,
         state.isError = true,
-        state.message = action.error;
+        state.message = action.payload || action.error.message;
       })
       .addCase(desassociarProjeto.pending, (state) => {
         state.isLoading = true;
@@ -304,6 +305,8 @@ export const authSlice = createSlice({
       })
       .addCase(registerPontoFuncionario.pending, (state) => {
         state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
       })
       .addCase(registerPontoFuncionario.fulfilled, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
@@ -311,7 +314,6 @@ export const authSlice = createSlice({
         state.isError = false;
         // eslint-disable-next-line no-unused-expressions
         state.isSuccess = true,
-        state.ponto = action.payload;
         state.message = "Ponto registrado com Sucesso"
       })
       .addCase(registerPontoFuncionario.rejected, (state, action) => {
@@ -319,7 +321,7 @@ export const authSlice = createSlice({
         state.isLoading = false,
         state.isSuccess = false,
         state.isError = true,
-        state.message = action.payload || action.error.message;;
+        state.message = action.payload || action.error.message;
       })
       .addCase(resetState, () => initialState);
   },

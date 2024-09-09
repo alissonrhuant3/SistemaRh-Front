@@ -77,6 +77,11 @@ main {
   background-color: hsl(0, 0%, 92%);
 }
 
+.inicio_instrucoes {
+  width: 35%;
+  height: 80%;
+}
+
 .clock {
   margin-top: 20px !important;
 }

@@ -9,6 +9,7 @@ import { HiViewGridAdd } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  associarProjeto,
   createFuncionario,
   deleteFuncionario,
   getAllFuncionarios,
@@ -78,7 +79,7 @@ const ListagemFuncionarios = () => {
   const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmLoadingAssoc, setConfirmLoadingAssoc] = useState(false);
-  const [nameFuncAssoc, setNameFuncAssoc] = useState("");
+  const [dadosFuncAssoc, setDadosFuncAssoc] = useState(null);
   const [dadosFunc, setDadosFunc] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
   const [funcionarioId, setFuncionarioId] = useState(0);
@@ -88,19 +89,17 @@ const ListagemFuncionarios = () => {
   const { role, nome } = useSelector((state) => state.auth.user);
   const funcionariosState = useSelector((state) => state.auth.funcionarios);
   const authState = useSelector((state) => state.auth);
-  const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario } = authState;
+  const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario, assoc } = authState;
   const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
   // console.log([funcionariosState[0].projetosvinculados[0]].includes(projetosEmpresa[]?._id));
-
   
-
   const showModal = (data) => {
     data !== null ? setDisabledInputs(true) : setDisabledInputs(false);
     setDadosFunc(data);
     setOpen(true);
   };
   const showModalAssoc = (e) => {
-    setNameFuncAssoc(e.nome);
+    setDadosFuncAssoc(e);
     if (message !== "PFS") {
       dispatch(getAllFuncionariosProjetos(e.id));
     }
@@ -129,7 +128,7 @@ const ListagemFuncionarios = () => {
     }, 2000);
   };
   const handleCancelAssoc = () => {
-    console.log("Clicked cancel button");
+    setDadosFuncAssoc(null);
     setOpenAssoc(false);
   };
 
@@ -145,6 +144,17 @@ const ListagemFuncionarios = () => {
   const apontamentos = (e) => {
     navigate(`apontamentos/${e.id}`);
   };
+
+  const associarProjetoFunc = (e) => {
+    console.log(e);
+    
+    dispatch(associarProjeto(e))
+  }
+
+  const desassociarProjetoFunc = (e) => {
+    console.log(e);
+    
+  }
 
   useEffect(() => {
     if (isSuccess && updatedFuncionario) {
@@ -177,13 +187,20 @@ const ListagemFuncionarios = () => {
         dispatch(resetState());
         dispatch(getAllFuncionariosEmpresa());
       }, 300)
+    } else if (isSuccess && assoc) {
+      setTimeout(() => {
+        toast.success("Associação realizada com sucesso!");
+        setOpenAssoc(false);
+        dispatch(resetState());
+        dispatch(getAllFuncionariosEmpresa());
+      }, 1000)
     } else if (isError) {
       setTimeout(() => {
         toast.error("Algo deu errado!");
         setConfirmLoading(false);
       }, 1000);
     }
-  }, [isSuccess, isError, isLoading, message, updatedFuncionario, createdFuncionario, deletedFuncionario]);
+  }, [isSuccess,assoc, isError, isLoading, message, updatedFuncionario, createdFuncionario, deletedFuncionario]);
 
   useEffect(() => {
     if (funcionariosState.length == 0) {
@@ -267,6 +284,7 @@ const ListagemFuncionarios = () => {
       numero_banco: funcionariosState[i].numero_banco,
       observacoes: funcionariosState[i].observacoes,
       empresa: funcionariosState[i].cod_empresa.razaosocial,
+      projetosvinculados: funcionariosState[i].projetosvinculados,
       acoes: (
         <>
           <button
@@ -311,6 +329,7 @@ const ListagemFuncionarios = () => {
               showModalAssoc({
                 nome: funcionariosState[i].nome,
                 id: funcionariosState[i]._id,
+                projetosvinculados: funcionariosState[i].projetosvinculados,
               })
             }
           >
@@ -326,7 +345,6 @@ const ListagemFuncionarios = () => {
 
   const handleSelectChange = (event) => {
     const selectedValue = event.target.value;
-    console.log(selectedValue);
   };
 
   const deleteAFuncionario = (id) => {
@@ -373,7 +391,6 @@ const ListagemFuncionarios = () => {
           onRow={(record, rowIndex) => {
             return {
               onDoubleClick: (event) => {
-                console.log(record);
                 
                 apontamentos(record);
               },
@@ -976,33 +993,29 @@ const ListagemFuncionarios = () => {
                   <h5 className="fs-5 me-2">Funcionário</h5>
                 </div>
                 <div className="w-100">
-                  <h5 className="text-center">{nameFuncAssoc}</h5>
+                  <h5 className="text-center">{dadosFuncAssoc?.nome}</h5>
                 </div>
               </div>
             </div>
             <br />
+            <div className="tabelaAssoc_linhas w-100 border-top-0">
             {projetosEmpresa?.map((item, index) => (
-              <div
-                key={index}
-                className={`${
-                  index !== 0 ? "tabelaAssoc_linhas_" : ""
-                } tabelaAssoc_linhas w-100 `}
-              >
-                <div className="d-flex">
+                <div key={index} className="d-flex tabelaAssoc_linhas border-bottom-0 border-start-0 border-end-0">
                   <div className="linha">
                     <h5 className="fs-5 me-5 mt-1">Projeto</h5>
                   </div>
-                  <div className="w-75">
+                  <div className="w-75 linha me-4">
                     <h6 className="text-projetos">
                       {item.nome == "Teste1" ? `${item.nome} teste` : item.nome}
                     </h6>
                   </div>
                   <div className="fs-5">
-                    <span style={{ cursor: "pointer" }}>[]</span>
+                      <span onClick={() => dadosFuncAssoc?.projetosvinculados.includes(item._id) ? desassociarProjetoFunc({idProjeto: item._id, idFuncionario: dadosFuncAssoc.id}) : associarProjetoFunc({idProjeto: item._id, idFuncionario: dadosFuncAssoc.id})} 
+                      style={{ cursor: "pointer" }}>[{dadosFuncAssoc?.projetosvinculados.includes(item._id) ? ' X ' : 'ㅤ'}]</span>
                   </div>
                 </div>
+                ))}
               </div>
-            ))}
           </div>
         </Modal>
       </div>

@@ -21,6 +21,11 @@ const getAllFuncionarios = async () => {
   return response.data;
 };
 
+const getFuncionario = async (id) => {
+  const response = await axios.get(`${base_url}/funcionario/${id}`, config);
+  return response.data;
+};
+
 const getAllFuncionariosEmpresa = async () => {
   const response = await axios.get(`${base_url}/funcionario/funcemp`, config);
   return response.data;
@@ -28,6 +33,11 @@ const getAllFuncionariosEmpresa = async () => {
 
 const getAllFuncionarioProjetos = async () => {
   const response = await axios.get(`${base_url}/funcionario/todos-projetos`, config);
+  return response.data;
+};
+
+const getApontamentosFuncionario = async (id) => {
+  const response = await axios.get(`${base_url}/funcionario/apontamentos/${id}`, config);
   return response.data;
 };
 
@@ -66,8 +76,10 @@ const deleteFuncionario = async (id) => {
 const authService = {
   login,
   getAllFuncionarios,
+  getFuncionario,
   getAllFuncionariosEmpresa,
   getAllFuncionarioProjetos,
+  getApontamentosFuncionario,
   associarFuncionarioProjeto,
   desassociarFuncionarioProjeto,
   createFuncionario,

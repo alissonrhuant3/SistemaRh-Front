@@ -9,6 +9,7 @@ const initialState = {
   user: getUserfromLocalStorage,
   funcionarios: [],
   funcprojetos: [],
+  funcionario: "",
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -37,6 +38,17 @@ export const getAllFuncionarios = createAsyncThunk(
   }
 );
 
+export const getFuncionario = createAsyncThunk(
+  "/auth/get-funcionario",
+  async (id,{rejectWithValue}) => {
+    try {
+      return await authService.getFuncionario(id)
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 export const getAllFuncionariosEmpresa = createAsyncThunk(
   "/auth/get-funcemp",
   async (thunkAPI) => {
@@ -55,6 +67,17 @@ export const getFuncionarioProjetos = createAsyncThunk(
       return await authService.getAllFuncionarioProjetos();
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getApontamentosFuncionario = createAsyncThunk(
+  "/auth/get-funcionario-apontamentos",
+  async (id,{rejectWithValue}) => {
+    try {
+      return await authService.getApontamentosFuncionario(id);
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -171,6 +194,25 @@ export const authSlice = createSlice({
         state.isError = true,
         state.message = action.error;
       })
+      .addCase(getFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.message = "Sucesso",
+        state.funcionario = action.payload;
+      })
+      .addCase(getFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.payload || action.error.message;
+      })
       .addCase(getAllFuncionariosEmpresa.pending, (state) => {
         state.isLoading = true;
       })
@@ -203,6 +245,25 @@ export const authSlice = createSlice({
         state.funcprojetos = action.payload;
       })
       .addCase(getFuncionarioProjetos.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
+      .addCase(getApontamentosFuncionario.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getApontamentosFuncionario.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.message = "Sucesso", //Projetos Funcionario Sucesso
+        state.apontamentos = action.payload;
+      })
+      .addCase(getApontamentosFuncionario.rejected, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
         state.isLoading = false,
         state.isSuccess = false,

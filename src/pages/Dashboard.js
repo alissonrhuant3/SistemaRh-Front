@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getProjetosEmpresa } from "../features/empresas/empresaSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { registerPontoFuncionario } from "../features/auth/authSlice";
+import { getFuncionarioProjetos, registerPontoFuncionario } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
 let schema = Yup.object().shape({
@@ -23,12 +23,12 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [hour, setHour] = useState("");
   const dispatch = useDispatch();
-  const projetosState = useSelector((state) => state.empresa.projetosEmpresa);
+  const projetosState = useSelector((state) => state.auth.funcprojetos);
   const authState = useSelector((state) => state.auth)
   const {isSuccess, isLoading, isError, message} = authState;
 
   const showModal = () => {
-    if (!projetosState) dispatch(getProjetosEmpresa());
+    if (projetosState.length == 0) dispatch(getFuncionarioProjetos());
     setOpen(true);
     setHour(moment().format("h:mm:ss A"));
   };

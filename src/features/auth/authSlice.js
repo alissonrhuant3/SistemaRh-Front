@@ -48,11 +48,11 @@ export const getAllFuncionariosEmpresa = createAsyncThunk(
   }
 );
 
-export const getAllFuncionariosProjetos = createAsyncThunk(
-  "/auth/get-funcionarios-projetos",
-  async (id,thunkAPI) => {
+export const getFuncionarioProjetos = createAsyncThunk(
+  "/auth/get-funcionario-projetos",
+  async (thunkAPI) => {
     try {
-      return await authService.getAllFuncionarioProjetos(id);
+      return await authService.getAllFuncionarioProjetos();
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
@@ -190,10 +190,10 @@ export const authSlice = createSlice({
         state.isError = true,
         state.message = action.error;
       })
-      .addCase(getAllFuncionariosProjetos.pending, (state) => {
+      .addCase(getFuncionarioProjetos.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getAllFuncionariosProjetos.fulfilled, (state, action) => {
+      .addCase(getFuncionarioProjetos.fulfilled, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
         state.isLoading = false,
         state.isError = false;
@@ -202,7 +202,7 @@ export const authSlice = createSlice({
         state.message = "PFS", //Projetos Funcionario Sucesso
         state.funcprojetos = action.payload;
       })
-      .addCase(getAllFuncionariosProjetos.rejected, (state, action) => {
+      .addCase(getFuncionarioProjetos.rejected, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
         state.isLoading = false,
         state.isSuccess = false,

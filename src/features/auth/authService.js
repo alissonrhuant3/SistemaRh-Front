@@ -26,8 +26,8 @@ const getAllFuncionariosEmpresa = async () => {
   return response.data;
 };
 
-const getAllFuncionarioProjetos = async (id) => {
-  const response = await axios.get(`${base_url}/funcionario/todos-projetos/${id}`, config);
+const getAllFuncionarioProjetos = async () => {
+  const response = await axios.get(`${base_url}/funcionario/todos-projetos`, config);
   return response.data;
 };
 

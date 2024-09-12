@@ -52,7 +52,7 @@ const updateFuncionario = async (data) => {
 };
 
 const desassociarFuncionarioProjeto = async (data) => {
-  const response = await axios.delete(`${base_url}/funcionario/delete-associacao/`,data, config);
+  const response = await axios.put(`${base_url}/funcionario/delete-associacao/`,{projetoId: data.idProjeto, funcionarioId: data.idFuncionario}, config);
   return response.data;
 };
 

@@ -94,11 +94,11 @@ export const associarProjeto = createAsyncThunk(
 
 export const desassociarProjeto = createAsyncThunk(
   "/auth/desassociar-funcionario-projeto",
-  async (data,thunkAPI) => {
+  async (data,{rejectWithValue}) => {
     try {
       return await authService.desassociarFuncionarioProjeto(data);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -237,6 +237,7 @@ export const authSlice = createSlice({
         state.isError = false;
         // eslint-disable-next-line no-unused-expressions
         state.isSuccess = true,
+        state.desassoc = action.payload;
         state.message = "Desassociado com Sucesso"
       })
       .addCase(desassociarProjeto.rejected, (state, action) => {
@@ -244,7 +245,7 @@ export const authSlice = createSlice({
         state.isLoading = false,
         state.isSuccess = false,
         state.isError = true,
-        state.message = action.error;
+        state.message = action.payload || action.error.message;
       })
       .addCase(createFuncionario.pending, (state) => {
         state.isLoading = true;

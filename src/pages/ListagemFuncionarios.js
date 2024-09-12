@@ -12,6 +12,7 @@ import {
   associarProjeto,
   createFuncionario,
   deleteFuncionario,
+  desassociarProjeto,
   getAllFuncionarios,
   getAllFuncionariosEmpresa,
   getAllFuncionariosProjetos,
@@ -89,7 +90,7 @@ const ListagemFuncionarios = () => {
   const { role, nome } = useSelector((state) => state.auth.user);
   const funcionariosState = useSelector((state) => state.auth.funcionarios);
   const authState = useSelector((state) => state.auth);
-  const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario, assoc } = authState;
+  const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario, assoc, desassoc } = authState;
   const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
   // console.log([funcionariosState[0].projetosvinculados[0]].includes(projetosEmpresa[]?._id));
   
@@ -100,9 +101,6 @@ const ListagemFuncionarios = () => {
   };
   const showModalAssoc = (e) => {
     setDadosFuncAssoc(e);
-    if (message !== "PFS") {
-      dispatch(getAllFuncionariosProjetos(e.id));
-    }
     if (!projetosEmpresa) {
       dispatch(getProjetosEmpresa());
     }
@@ -118,14 +116,6 @@ const ListagemFuncionarios = () => {
     setDadosFunc(null);
     setDisabledInputs(false);
     setOpen(false);
-  };
-  const handleOkAssoc = () => {
-    alert("O Augusto quer ser Homem");
-    setConfirmLoadingAssoc(true);
-    setTimeout(() => {
-      setOpenAssoc(false);
-      setConfirmLoadingAssoc(false);
-    }, 2000);
   };
   const handleCancelAssoc = () => {
     setDadosFuncAssoc(null);
@@ -147,12 +137,11 @@ const ListagemFuncionarios = () => {
 
   const associarProjetoFunc = (e) => {
     console.log(e);
-    
     dispatch(associarProjeto(e))
   }
 
   const desassociarProjetoFunc = (e) => {
-    console.log(e);
+    dispatch(desassociarProjeto(e))
     
   }
 
@@ -191,6 +180,13 @@ const ListagemFuncionarios = () => {
       setTimeout(() => {
         toast.success("Associação realizada com sucesso!");
         setOpenAssoc(false);
+        dispatch(resetState());
+        dispatch(getAllFuncionariosEmpresa());
+      }, 1000)
+    } else if (isSuccess && desassoc) {
+      setTimeout(() => {
+        toast.success("Projeto desassociado com sucesso!");
+        setOpenAssoc(false)
         dispatch(resetState());
         dispatch(getAllFuncionariosEmpresa());
       }, 1000)
@@ -981,7 +977,6 @@ const ListagemFuncionarios = () => {
           title="Associação"
           onCancel={handleCancelAssoc}
           open={openAssoc}
-          onOk={handleOkAssoc}
           confirmLoading={confirmLoadingAssoc}
           maskClosable={false}
           width={"60%"}

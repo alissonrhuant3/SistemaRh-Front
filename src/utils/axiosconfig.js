@@ -23,6 +23,14 @@ export const verifyExpJwtToken = () => {
   return "Usuário não logado";
 };
 
+export const verifyRole = () => {
+  const usuario = localStorage.getItem("user").split(",")[3];
+  if(usuario.split(":")[1] === `"gestor"`) return "gestor";
+  else if (usuario.split(":")[1] === `"empresa/rh"`) return "empresa/rh";
+  else if (usuario.split(":")[1] === `"admin"`) return "admin";
+  else if (usuario.split(":")[1] === `"funcionario"`) return "funcionario";
+}
+
 export const config = {
   headers: {
     Authorization: `Bearer ${

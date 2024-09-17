@@ -12,6 +12,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { createProjetos, deleteProjeto, getAllProjetos, resetState, updateAProjeto } from "../features/projetos/projetoSlice";
 import CustomModal from "../components/CustomModal";
+import { verifyExpJwtToken } from "../utils/axiosconfig";
 
 let schema = Yup.object().shape({
   nome: Yup.string().required("Nome do projeto é obrigatório!"),
@@ -40,6 +41,13 @@ const columns = [
 
 
 const ListagemProjetos = () => {
+
+  if (verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/");
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/");
+  }
+
   const [open, setOpen] = useState(false);
   const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -110,7 +118,7 @@ const ListagemProjetos = () => {
   }, [isSuccess, isError, isLoading, message, updatedProjeto, createdProjeto, deletedProjeto]);
 
   useEffect(() => {
-    dispatch(getProjetosEmpresa())
+    if (!projetosState) dispatch(getProjetosEmpresa());
   },[])
 
   const formik = useFormik({

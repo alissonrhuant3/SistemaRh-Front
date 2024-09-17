@@ -17,6 +17,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import CustomModal from "../components/CustomModal";
+import { verifyExpJwtToken } from "../utils/axiosconfig";
 
 let schema = Yup.object().shape({
   razaosocial: Yup.string().required("Razão Social da empresa é obrigatório!"),
@@ -69,14 +70,19 @@ const columns = [
 ];
 
 const ListagemEmpresas = () => {
+
+  if (verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/");
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/");
+  }
+
   const [open, setOpen] = useState(false);
   const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [empresaId, setEmpresaId] = useState(0);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
-
-
   const dispatch = useDispatch();
   const getEmpresaState = useSelector((state) => state.empresa.empresas);
   const getEmpresaEstado = useSelector((state) => state.empresa);
@@ -135,7 +141,7 @@ const ListagemEmpresas = () => {
   }, [isSuccess, isError, isLoading, message, updatedEmpresa, createdEmpresa]);
 
   useEffect(() => {
-    dispatch(getEmpresas());
+    if (getEmpresaState.length == 0) dispatch(getEmpresas());
   }, []);
 
   const formik = useFormik({

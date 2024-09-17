@@ -38,11 +38,11 @@ export const deleteEmpresa = createAsyncThunk(
 
 export const createEmpresa = createAsyncThunk(
   "empresa/create-empresa",
-  async (Data,thunkAPI) => {
+  async (Data,{rejectWithValue}) => {
     try {
       return await empresaService.createEmpresa(Data);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -120,7 +120,7 @@ export const empresaSlice = createSlice({
       state.isLoading = false;
       state.isError = true;
       state.isSuccess = false;
-      state.message = action.error;
+      state.message = action.payload || action.error.message;
     })
     .addCase(deleteEmpresa.pending, (state) => {
       state.isLoading = true;

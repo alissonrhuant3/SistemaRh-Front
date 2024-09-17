@@ -260,6 +260,10 @@ main {
 /***** End Listagem Funcionários *****/
 
 /***** ApontamentosFuncionario *****/ 
+.ant-table-cell.pointer-column{
+  cursor: pointer !important;
+}
+
 .apontamentosTitle {
   font-size: 25px;
   margin: 2px;

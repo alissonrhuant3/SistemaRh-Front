@@ -60,6 +60,17 @@ export const getAllFuncionariosEmpresa = createAsyncThunk(
   }
 );
 
+export const getAllFuncionariosEmpresaGestor = createAsyncThunk(
+  "/auth/get-funcempg",
+  async (thunkAPI) => {
+    try {
+      return await authService.getAllFuncionariosEmpresaGestor();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const getFuncionarioProjetos = createAsyncThunk(
   "/auth/get-funcionario-projetos",
   async (thunkAPI) => {
@@ -125,6 +136,17 @@ export const desassociarProjeto = createAsyncThunk(
     }
   }
 );
+
+export const aprovacaoGestor = createAsyncThunk(
+  "/auth/aprovar-he",
+  async (data, thunkAPI) => {
+    try {
+      return await authService.aprovarHEGestor(data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+)
 
 export const deleteFuncionario = createAsyncThunk(
   "/auth/delete-funcionario",
@@ -232,6 +254,25 @@ export const authSlice = createSlice({
         state.isError = true,
         state.message = action.error;
       })
+      .addCase(getAllFuncionariosEmpresaGestor.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllFuncionariosEmpresaGestor.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.message = "Sucesso",
+        state.funcionarios = action.payload;
+      })
+      .addCase(getAllFuncionariosEmpresaGestor.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
       .addCase(getFuncionarioProjetos.pending, (state) => {
         state.isLoading = true;
       })
@@ -307,6 +348,25 @@ export const authSlice = createSlice({
         state.isSuccess = false,
         state.isError = true,
         state.message = action.payload || action.error.message;
+      })
+      .addCase(aprovacaoGestor.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(aprovacaoGestor.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.aprovacao = action.payload;
+        state.message = "Desassociado com Sucesso"
+      })
+      .addCase(aprovacaoGestor.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
       })
       .addCase(createFuncionario.pending, (state) => {
         state.isLoading = true;

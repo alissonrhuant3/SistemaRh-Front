@@ -31,6 +31,11 @@ const getAllFuncionariosEmpresa = async () => {
   return response.data;
 };
 
+const getAllFuncionariosEmpresaGestor = async () => {
+  const response = await axios.get(`${base_url}/funcionario/funcempg`, config);
+  return response.data;
+};
+
 const getAllFuncionarioProjetos = async () => {
   const response = await axios.get(`${base_url}/funcionario/todos-projetos`, config);
   return response.data;
@@ -66,22 +71,28 @@ const desassociarFuncionarioProjeto = async (data) => {
   return response.data;
 };
 
-const deleteFuncionario = async (id) => {
-  const response = await axios.delete(`${base_url}/funcionario/delete-funcionario/${id}`, config)
+const aprovarHEGestor = async (data) => {
+  const response = await axios.put(`${base_url}/funcionario/gestoraprova`, data, config)
   return response.data;
 }
 
 
+const deleteFuncionario = async (id) => {
+  const response = await axios.delete(`${base_url}/funcionario/delete-funcionario/${id}`, config)
+  return response.data;
+}
 
 const authService = {
   login,
   getAllFuncionarios,
   getFuncionario,
   getAllFuncionariosEmpresa,
+  getAllFuncionariosEmpresaGestor,
   getAllFuncionarioProjetos,
   getApontamentosFuncionario,
   associarFuncionarioProjeto,
   desassociarFuncionarioProjeto,
+  aprovarHEGestor,
   createFuncionario,
   updateFuncionario,
   deleteFuncionario,

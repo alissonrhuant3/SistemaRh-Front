@@ -4,73 +4,98 @@ import { GrFormView } from "react-icons/gr";
 import { AiFillDelete } from "react-icons/ai";
 import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getApontamentosFuncionario, getFuncionario } from "../features/auth/authSlice";
+import { aprovacaoGestor, getApontamentosFuncionario, getFuncionario } from "../features/auth/authSlice";
 import moment from "moment";
-
-const columns = [
-  {
-    title: "Data",
-    dataIndex: "data",
-  },
-  {
-    title: "Dia da Semana",
-    dataIndex: "diasemana",
-  },
-  {
-    title: "Projeto",
-    dataIndex: "projeto",
-  },
-  {
-    title: "Tarefa",
-    dataIndex: "tarefa",
-  },
-  {
-    title: "Hora início",
-    dataIndex: "horainicio",
-  },
-  {
-    title: "Hora Fim",
-    dataIndex: "horafim",
-  },
-  {
-    title: "Hora início",
-    dataIndex: "horainicio2",
-  },
-  {
-    title: "Hora Fim",
-    dataIndex: "horafim2",
-  },
-  {
-    title: "Total",
-    dataIndex: "total",
-  },
-  {
-    title: "HE início",
-    dataIndex: "heinicio",
-  },
-  {
-    title: "HE fim",
-    dataIndex: "hefim",
-  },
-  {
-    title: "GESTOR",
-    dataIndex: "gestor",
-  },
-];
-
+import { verifyExpJwtToken } from "../utils/axiosconfig";
+import { toast } from "react-toastify";
 
 const Apontamentos = () => {
+  
   const location = useLocation();
   const dispatch = useDispatch();
   const getFuncID = location.pathname.split("/")[4];
   const funcionarioState = useSelector((state) => state.auth);
   const apontamentos = useSelector((state) => state.auth.apontamentos);
-  
+
+  const aprovarHoraExtra = (e) => {
+    if(e.gestor === "Aprovado") {
+      toast.info("Este apontamento já foi aprovado!")
+    } else {
+      dispatch(aprovacaoGestor({apontamentoId: e.id, funcionarioId: getFuncID}))
+      setTimeout(() => {
+        dispatch(getApontamentosFuncionario(getFuncID))
+      }, 300);
+    }
+    
+  }
+
+  if (verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/");
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/");
+  }
   
   useEffect(() => {
     dispatch(getFuncionario(getFuncID))
     dispatch(getApontamentosFuncionario(getFuncID))
   },[])
+
+  const columns = [
+    {
+      title: "Data",
+      dataIndex: "data",
+    },
+    {
+      title: "Dia da Semana",
+      dataIndex: "diasemana",
+    },
+    {
+      title: "Projeto",
+      dataIndex: "projeto",
+    },
+    {
+      title: "Tarefa",
+      dataIndex: "tarefa",
+    },
+    {
+      title: "Hora início",
+      dataIndex: "horainicio",
+    },
+    {
+      title: "Hora Fim",
+      dataIndex: "horafim",
+    },
+    {
+      title: "Hora início",
+      dataIndex: "horainicio2",
+    },
+    {
+      title: "Hora Fim",
+      dataIndex: "horafim2",
+    },
+    {
+      title: "Total",
+      dataIndex: "total",
+    },
+    {
+      title: "HE início",
+      dataIndex: "heinicio",
+    },
+    {
+      title: "HE fim",
+      dataIndex: "hefim",
+    },
+    {
+      title: "GESTOR",
+      dataIndex: "gestor",
+      className: "pointer-column",
+      onCell: (record, rowIndex) => ({
+        onDoubleClick: () => {
+          aprovarHoraExtra(record)
+        }
+      })
+    },
+  ];
 
   const data1 = [];
   for (let i = 0; i < apontamentos?.length; i++) {
@@ -88,19 +113,20 @@ const Apontamentos = () => {
     diasemana: moment(apontamentos[i].data).locale("pt-br").format("dddd"),
     projeto: apontamentos[i].projeto.nome,
     tarefa: apontamentos[i].tarefa,
-    horainicio: apontamentos[i].horainicio ,
-    horafim: apontamentos[i].horafim,
-    horainicio2: apontamentos[i].horainicio2,
-    horafim2: apontamentos[i].horafim2,
+    horainicio: apontamentos[i].horainicio ? apontamentos[i].horainicio : "00:00" ,
+    horafim: apontamentos[i].horafim ? apontamentos[i].horafim : "00:00",
+    horainicio2: apontamentos[i].horainicio2 ? apontamentos[i].horainicio2 : "00:00",
+    horafim2: apontamentos[i].horafim2 ? apontamentos[i].horafim2 : "00:00",
     total: Math.floor(total1 + total2),
-    heinicio: apontamentos[i].heinicio,
-    hefim: apontamentos[i].hefim,
+    heinicio: apontamentos[i].heinicio ? apontamentos[i].heinicio : "00:00",
+    hefim: apontamentos[i].hefim ? apontamentos[i].hefim : "00:00",
     gestor: apontamentos[i].gestoraprova ? "Aprovado" : "",
+    id: apontamentos[i]._id
   });
   } 
-  console.log(data1);
+
   
-  
+
   return (
     <>
       <div className="tabelaAssoc_linhas w-100 apontamentos">

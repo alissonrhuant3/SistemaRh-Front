@@ -27,6 +27,12 @@ const Dashboard = () => {
   const authState = useSelector((state) => state.auth)
   const {isSuccess, isLoading, isError, message} = authState;
 
+  if (verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/");
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/");
+  }
+
   const showModal = () => {
     if (projetosState.length == 0) dispatch(getFuncionarioProjetos());
     setOpen(true);
@@ -43,11 +49,6 @@ const Dashboard = () => {
   const handleCancel = () => {
     setOpen(false);
   };
-  if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
-  } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
-  }
 
   useEffect(() => {
     if (isError) {
@@ -108,15 +109,14 @@ const Dashboard = () => {
           <div className="d-flex clock__customer">
             <h5>Bem-vindo</h5>
             <p>
-              <AiOutlineUser className="fs-4 me-1" /> Alisson Rhuan Pereira da
-              Silva
+              <AiOutlineUser className="fs-4 me-1" /> {authState.user.nome}
             </p>
             <p id="enterprise">
               <FaRegBuilding className="fs-5 me-1" />
-              Lojas Gregy LTDA
+              {authState.user.empresa}
             </p>
-            <p id="role" style={{ color: "red" }}>
-              ADMINISTRADOR
+            <p id="role" style={{ color: "" }}>
+            {authState.user.role}
             </p>
           </div>
           <div className="d-flex justify-content-center mt-2">

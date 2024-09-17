@@ -15,6 +15,7 @@ import {
   desassociarProjeto,
   getAllFuncionarios,
   getAllFuncionariosEmpresa,
+  getAllFuncionariosEmpresaGestor,
   getAllFuncionariosProjetos,
   resetState,
   updateFuncionario,
@@ -24,6 +25,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import CustomModal from "../components/CustomModal";
+import { verifyExpJwtToken } from "../utils/axiosconfig";
 const moment = require("moment");
 
 let schema = Yup.object().shape({
@@ -43,6 +45,8 @@ let schema = Yup.object().shape({
   valor_remuneracao: Yup.number().required(
     "Valor de remuneração é obrigatório!"
   ),
+  perfil: Yup.string().required("Perfil é requerido!"),
+  cod_gestor: Yup.string().required("Gestor é requerido!"),
   nome_banco: Yup.string().required("Nome do banco é obrigatório!"),
   agencia: Yup.number().required("Agência é obrigatória!"),
   conta: Yup.string().required("Conta é obrigatória!"),
@@ -51,30 +55,16 @@ let schema = Yup.object().shape({
   // tipo_pix: Yup.string().required("Tipo de chave pix é obrigatório!"),
 });
 
-const columns = [
-  {
-    title: "Nome",
-    dataIndex: "nome",
-  },
-  {
-    title: "CPF",
-    dataIndex: "cpf",
-  },
-  {
-    title: "Telefone",
-    dataIndex: "telefone",
-  },
-  {
-    title: "Empresa",
-    dataIndex: "empresa",
-  },
-  {
-    title: "Ações",
-    dataIndex: "acoes",
-  },
-];
+
 
 const ListagemFuncionarios = () => {
+
+  if (verifyExpJwtToken() === false) {
+    window.location.replace("http://localhost:3000/");
+  } else if (verifyExpJwtToken() === "Usuário não logado") {
+    window.location.replace("http://localhost:3000/");
+  }
+
   const [open, setOpen] = useState(false);
   const [openAssoc, setOpenAssoc] = useState(false);
   const [openModalConfirm, setOpenModalConfirm] = useState(false);
@@ -93,6 +83,33 @@ const ListagemFuncionarios = () => {
   const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario, assoc, desassoc } = authState;
   const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
   // console.log([funcionariosState[0].projetosvinculados[0]].includes(projetosEmpresa[]?._id));
+  
+  const columns = [
+    {
+      title: "Nome",
+      dataIndex: "nome",
+    },
+    {
+      title: "CPF",
+      dataIndex: "cpf",
+    },
+    {
+      title: "Telefone",
+      dataIndex: "telefone",
+    },
+    {
+      title: "Empresa",
+      dataIndex: "empresa",
+    },
+    {
+      title: "Perfil",
+      dataIndex: "perfil",
+    },
+    ...(role === "admin" || role === "empresa/rh" ? [{
+      title: "Ações",
+      dataIndex: "acoes",
+    }] : [])
+  ];
   
   const showModal = (data) => {
     data !== null ? setDisabledInputs(true) : setDisabledInputs(false);
@@ -200,7 +217,8 @@ const ListagemFuncionarios = () => {
 
   useEffect(() => {
     if (funcionariosState.length == 0) {
-      dispatch(getAllFuncionariosEmpresa());
+      if(role === "empresa/rh" || role === "admin") dispatch(getAllFuncionariosEmpresa())
+        else if (role === "gestor") dispatch(getAllFuncionariosEmpresaGestor())
     }
   }, []);
 
@@ -234,6 +252,8 @@ const ListagemFuncionarios = () => {
       horario2: dadosFunc !== null ? dadosFunc?.horario2 : "",
       horaextra: dadosFunc !== null ? dadosFunc?.horaextra : false,
       password: "",
+      cod_gestor: dadosFunc !== null ? dadosFunc?.cod_gestor : "",
+      perfil: dadosFunc !== null ? dadosFunc?.perfil : "",
       observacoes: dadosFunc !== null ? dadosFunc?.observacoes : "",
     },
     validationSchema: schema,
@@ -243,6 +263,7 @@ const ListagemFuncionarios = () => {
         dispatch(updateFuncionario({id: dadosFunc.id, data: values}))
       } else {
         setConfirmLoading(true)
+        alert(JSON.stringify(values))
         dispatch(createFuncionario(values))
       }
       
@@ -281,6 +302,8 @@ const ListagemFuncionarios = () => {
       observacoes: funcionariosState[i].observacoes,
       empresa: funcionariosState[i].cod_empresa.razaosocial,
       projetosvinculados: funcionariosState[i].projetosvinculados,
+      cod_gestor: funcionariosState[i].cod_gestor._id,
+      perfil: funcionariosState[i].perfil,
       acoes: (
         <>
           <button
@@ -313,6 +336,8 @@ const ListagemFuncionarios = () => {
                 numero_banco: funcionariosState[i].numero_banco,
                 observacoes: funcionariosState[i].observacoes,
                 empresa: funcionariosState[i].cod_empresa.razaosocial,
+                cod_gestor: funcionariosState[i].cod_gestor._id,
+                perfil: funcionariosState[i].perfil,
               })
             }
             className="bg-transparent border-0 text-blue"
@@ -370,14 +395,16 @@ const ListagemFuncionarios = () => {
                 </button>
               </form>
             </div>
-            <div className="d-flex ">
+            {role === "admin" || role === "empresa/rh" ? 
+              <div className="d-flex ">
               <button
                 className="btn btn-outline-primary mb-3"
                 onClick={() => showModal(null)}
               >
                 Cadastrar Funcionário
               </button>
-            </div>
+            </div>  
+            : <></>} 
           </div>
         </div>
       </div>
@@ -954,6 +981,51 @@ const ListagemFuncionarios = () => {
                   </div>
                 </div>
               )}
+            </div>
+            <div className="d-flex mb-3 gap-2">
+              <div class="form-floating w-50">
+              <select
+                  class="form-select formInput"
+                  aria-label="Default select example"
+                  id="gestor"
+                  name="cod_gestor"
+                  onChange={formik.handleChange("cod_gestor")}
+                  onBlur={formik.handleBlur("cod_gestor")}
+                  value={formik.values.cod_gestor}
+                  disabled={disabledInputs === true ? true : false}
+                >
+                  <option selected>Selecione</option>
+                  
+                  {funcionariosState?.map((item, index) => (
+                   item.perfil === "gestor" || item.perfil === "empresa/rh" || item.perfil === "admin" ? <option value={item._id}>{item.nome}</option> : ""
+                  ))}
+                </select>
+                <label for="gestor">Gestor</label>
+                <div className="error">
+                    {formik.touched.cod_gestor && formik.errors.cod_gestor}
+                  </div>
+              </div>
+              <div class="form-floating w-50">
+              <select
+                  class="form-select formInput"
+                  aria-label="Default select example"
+                  id="perfil"
+                  name="perfil"
+                  onChange={formik.handleChange("perfil")}
+                  onBlur={formik.handleBlur("perfil")}
+                  value={formik.values.perfil}
+                  disabled={disabledInputs === true ? true : false}
+                >
+                  <option selected>Selecione</option>
+                  <option value="empresa/rh">EMPRESA/RH</option>
+                  <option value="gestor">GESTOR</option>
+                  <option value="funcionario">FUNCIONÁRIO</option>
+                </select>
+                <label for="perfil">Perfil</label>
+                <div className="error">
+                    {formik.touched.perfil && formik.errors.perfil}
+                  </div>
+              </div>
             </div>
             <div className="d-flex mb-3 gap-2">
               <div class="form-floating w-100">

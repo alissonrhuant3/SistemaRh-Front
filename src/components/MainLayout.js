@@ -10,13 +10,16 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { FaClipboardList } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { verifyExpJwtToken, verifyRole } from "../utils/axiosconfig";
+import CustomModal from "./CustomModal";
 
 const MainLayout = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { Header, Sider, Content } = Layout;
   const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -37,6 +40,10 @@ const MainLayout = () => {
   const logout = () => {
     localStorage.removeItem("user")
     localStorage.removeItem("token")
+  }
+
+  const updatePassword = () => {
+    navigate("updatepassword")
   }
   
   return (
@@ -106,7 +113,15 @@ const MainLayout = () => {
               height: 64,
             }}
           />
-          <div className="d-flex align-items-center me-4"><h6 className="" onClick={() => logout()}>Sair</h6></div>
+          <div class="dropdown me-3">
+  <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Opções
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="#" onClick={() => updatePassword()}>Trocar Senha</a></li>
+    <li><a class="dropdown-item" href="#" onClick={() => logout()}>Sair</a></li>
+  </ul>
+</div> 
         </Header>
         <Content
           style={{
@@ -119,7 +134,7 @@ const MainLayout = () => {
         >
           <ToastContainer
             position="top-right"
-            autoClose={2000}
+            autoClose={1500}
             hideProgressBar={false}
             newestOnTop={true}
             closeOnClick

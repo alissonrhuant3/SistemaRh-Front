@@ -88,6 +88,10 @@ const aprovarHEGestor = async (data) => {
   return response.data;
 }
 
+const updatePassword = async (data) => {
+  const response = await axios.put(`${base_url}/funcionario/password`,data, config);
+  return response.data;
+}
 
 const deleteFuncionario = async (id) => {
   const response = await axios.delete(`${base_url}/funcionario/delete-funcionario/${id}`, config)
@@ -107,6 +111,7 @@ const authService = {
   aprovarHEGestor,
   createFuncionario,
   updateFuncionario,
+  updatePassword,
   deleteFuncionario,
   registerPonto,
   downloadContrato,

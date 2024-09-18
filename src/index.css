@@ -295,3 +295,22 @@ border-right: 0.0px solid rgb(0, 0, 0);
 }
 /***** End ApontamentosFuncionario *****/
 
+/***** updatePassword *****/ 
+.updatePassword {
+  flex-direction: column;
+  background: #FFD333;
+  width: 25%;
+  min-height: 400px;
+  border-radius: 5px;
+}
+
+.updatePassword__inputs .input {
+  width: 280px;
+}
+
+.updatePassword__title > h5 {
+  color: rgb(0, 0, 0) !important;
+}
+/***** End updatePassword *****/
+
+

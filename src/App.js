@@ -8,6 +8,7 @@ import ListagemFuncionarios from "./pages/ListagemFuncionarios";
 import ListagemProjetos from "./pages/ListagemProjetos";
 import Apontamentos from "./pages/Apontamentos";
 import { PrivateRoutes, AdminRoutes, AdminAndEmpresarhRoutes } from "./routing/PrivateRoutes";
+import UpdatePassword from "./pages/UpdatePassword";
 
 function App() {
   
@@ -21,6 +22,7 @@ function App() {
           <Route path="funcionarios" element={<ListagemFuncionarios />}/>
           <Route path="projetos" element={<AdminAndEmpresarhRoutes><ListagemProjetos /></AdminAndEmpresarhRoutes>}/>
           <Route path="funcionarios/apontamentos/:id" element={<Apontamentos />}/>
+          <Route path="updatepassword" element={<UpdatePassword />}/>
         </Route>
         <Route path="*" element={<Navigate to="/admin" />} />
       </Routes>

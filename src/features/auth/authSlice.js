@@ -181,7 +181,19 @@ export const registerPontoFuncionario = createAsyncThunk(
   }
 );
 
+export const updatePassword = createAsyncThunk(
+  "/auth/update-password",
+  async (data,{rejectWithValue}) => {
+    try {
+      return await authService.updatePassword(data);
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 export const resetState = createAction("Reset_all");
+export const resetMessage = createAction("Reset_message");
 
 export const authSlice = createSlice({
   name: "auth",
@@ -331,8 +343,7 @@ export const authSlice = createSlice({
         state.isError = false;
         // eslint-disable-next-line no-unused-expressions
         state.isSuccess = true,
-        state.message = "Sucesso", //Projetos Funcionario Sucesso
-        state.contratoPdfUrl = action.payload;
+        state.message = "Contrato Baixado com Sucesso" //Projetos Funcionario Sucesso
       })
       .addCase(downloadContratoPdf.rejected, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
@@ -475,7 +486,34 @@ export const authSlice = createSlice({
         state.isError = true,
         state.message = action.payload || action.error.message;
       })
-      .addCase(resetState, () => initialState);
+      .addCase(updatePassword.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+      })
+      .addCase(updatePassword.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.message = "Senha atualizada com sucesso"
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.payload || action.error.message;
+      })
+      .addCase(resetState, () => initialState)
+      .addCase(resetMessage, (state) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = false
+        state.message = ""
+      });
   },
 });
 

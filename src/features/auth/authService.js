@@ -1,6 +1,6 @@
 import axios from "axios";
 import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import { config, configAdvanced, configAdvanced2 } from "../../utils/axiosconfig";
 
 const login = async (userData) => {
   const response = await axios.post(`${base_url}/funcionario/login`, {
@@ -46,6 +46,18 @@ const getApontamentosFuncionario = async (id) => {
   return response.data;
 };
 
+const downloadContrato = async (id) => {
+  const response = await axios.get(`${base_url}/funcionario/download/${id}`, configAdvanced2);
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.setAttribute("download", "contrato.pdf");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 const associarFuncionarioProjeto = async (data) => {
   const response = await axios.post(`${base_url}/funcionario/associar-projeto/`,{projetoId: data.idProjeto, funcionarioId: data.idFuncionario}, config);
   return response.data;
@@ -56,8 +68,8 @@ const registerPonto = async (data) => {
     return response.data;
 }
 
-const createFuncionario = async (data) => {
-  const response = await axios.post(`${base_url}/funcionario/registrar/`,data, config);
+const createFuncionario = async (formData) => {
+  const response = await axios.post(`${base_url}/funcionario/registrar/`,formData, configAdvanced);
   return response.data;
 };
 
@@ -97,6 +109,7 @@ const authService = {
   updateFuncionario,
   deleteFuncionario,
   registerPonto,
+  downloadContrato,
 };
 
 export default authService;

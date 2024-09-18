@@ -93,13 +93,24 @@ export const getApontamentosFuncionario = createAsyncThunk(
   }
 );
 
+export const downloadContratoPdf = createAsyncThunk(
+  "/auth/get-funcionario-contrato",
+  async (id,{rejectWithValue}) => {
+    try {
+      return await authService.downloadContrato(id);
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 export const createFuncionario = createAsyncThunk(
   "/auth/create-funcionario",
-  async (data,thunkAPI) => {
+  async (formData,thunkAPI) => {
     try {
-      return await authService.createFuncionario(data);
+      return await authService.createFuncionario(formData);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data || error.message);
     }
   }
 );
@@ -305,6 +316,25 @@ export const authSlice = createSlice({
         state.apontamentos = action.payload;
       })
       .addCase(getApontamentosFuncionario.rejected, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isSuccess = false,
+        state.isError = true,
+        state.message = action.error;
+      })
+      .addCase(downloadContratoPdf.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(downloadContratoPdf.fulfilled, (state, action) => {
+        // eslint-disable-next-line no-unused-expressions
+        state.isLoading = false,
+        state.isError = false;
+        // eslint-disable-next-line no-unused-expressions
+        state.isSuccess = true,
+        state.message = "Sucesso", //Projetos Funcionario Sucesso
+        state.contratoPdfUrl = action.payload;
+      })
+      .addCase(downloadContratoPdf.rejected, (state, action) => {
         // eslint-disable-next-line no-unused-expressions
         state.isLoading = false,
         state.isSuccess = false,

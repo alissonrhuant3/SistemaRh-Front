@@ -24,14 +24,34 @@ export const verifyExpJwtToken = () => {
 };
 
 export const verifyRole = () => {
-  const usuario = localStorage.getItem("user").split(",")[3];
-  if(usuario.split(":")[1] === `"gestor"`) return "gestor";
-  else if (usuario.split(":")[1] === `"empresa/rh"`) return "empresa/rh";
-  else if (usuario.split(":")[1] === `"admin"`) return "admin";
-  else if (usuario.split(":")[1] === `"funcionario"`) return "funcionario";
+  const token = localStorage.getItem("token");
+  const decoded = jwtDecode(token);
+  
+  if(decoded.id.role === "gestor") return "gestor";
+  else if(decoded.id.role === "empresa/rh") return "empresa/rh";
+  else if(decoded.id.role === "admin") return "admin";
+  else if(decoded.id.role === "funcionario") return "funcionario";
 }
 
 export const config = {
+  headers: {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage !== null ? getTokenFromLocalStorage : ""
+    }`,
+  },
+};
+
+export const configAdvanced = {
+  headers: {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage !== null ? getTokenFromLocalStorage : ""
+    }`,
+    'Content-Type': 'multipart/form-data',
+  },
+};
+
+export const configAdvanced2 = {
+  responseType: "blob",
   headers: {
     Authorization: `Bearer ${
       getTokenFromLocalStorage !== null ? getTokenFromLocalStorage : ""

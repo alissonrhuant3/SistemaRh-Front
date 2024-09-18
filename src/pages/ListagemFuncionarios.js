@@ -13,6 +13,7 @@ import {
   createFuncionario,
   deleteFuncionario,
   desassociarProjeto,
+  downloadContratoPdf,
   getAllFuncionarios,
   getAllFuncionariosEmpresa,
   getAllFuncionariosEmpresaGestor,
@@ -51,7 +52,9 @@ let schema = Yup.object().shape({
   agencia: Yup.number().required("Agência é obrigatória!"),
   conta: Yup.string().required("Conta é obrigatória!"),
   tipo_conta: Yup.string().required("Tipo de conta é obrigatório!"),
-  
+  contratoPdf: Yup.mixed().required("Contrato PDF é obrigatório!")
+    .test("fileSize", "O arquivo deve ter no máximo 10MB", value => value && value.size <= 10 * 1024 * 1024)
+    .test("fileType", "O arquivo deve ser um PDF", value => value && value.type === "application/pdf"),
   // tipo_pix: Yup.string().required("Tipo de chave pix é obrigatório!"),
 });
 
@@ -255,16 +258,24 @@ const ListagemFuncionarios = () => {
       cod_gestor: dadosFunc !== null ? dadosFunc?.cod_gestor : "",
       perfil: dadosFunc !== null ? dadosFunc?.perfil : "",
       observacoes: dadosFunc !== null ? dadosFunc?.observacoes : "",
+      contratoPdf: null,
     },
     validationSchema: schema,
     onSubmit: (values) => {
+      console.log(values);
+      
+      const formData = new FormData();
+      Object.keys(values).forEach(key => {
+        formData.append(key, values[key])
+      })
+      
+      
       if(dadosFunc !== null) {
         setConfirmLoading(true)
-        dispatch(updateFuncionario({id: dadosFunc.id, data: values}))
+        dispatch(updateFuncionario({id: dadosFunc.id, data: formData}))
       } else {
         setConfirmLoading(true)
-        alert(JSON.stringify(values))
-        dispatch(createFuncionario(values))
+        dispatch(createFuncionario(formData))
       }
       
     },
@@ -363,9 +374,9 @@ const ListagemFuncionarios = () => {
       ),
     });
   }
-
-  const handleSelectChange = (event) => {
-    const selectedValue = event.target.value;
+  
+  const handleDownload = () => {
+    dispatch(downloadContratoPdf(dadosFunc.id))
   };
 
   const deleteAFuncionario = (id) => {
@@ -1043,6 +1054,24 @@ const ListagemFuncionarios = () => {
                 <label for="observacoes">Observações</label>
               </div>
             </div>
+            {dadosFunc !== null ? 
+              <div className="d-flex mb-3 gap-2">
+                <button onClick={handleDownload}>Baixar Contrato</button>
+              </div>
+            : 
+              <div className="d-flex mb-3 gap-2">
+              <input
+                type="file"
+                name="contratoPdf"
+                id="contratoPdf"
+                onChange={(event) => formik.setFieldValue("contratoPdf", event.currentTarget.files[0])}
+                disabled={disabledInputs === true ? true : false}
+              />
+              <div className="error">
+                {formik.touched.contratoPdf && formik.errors.contratoPdf}
+              </div>
+            </div>
+            }
           </form>
         </Modal>
         <Modal

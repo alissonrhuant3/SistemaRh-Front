@@ -11,7 +11,7 @@ import { FaClipboardList } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
-import { verifyExpJwtToken } from "../utils/axiosconfig";
+import { verifyExpJwtToken, verifyRole } from "../utils/axiosconfig";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -20,13 +20,14 @@ const MainLayout = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const roleUser = useSelector((state) => state.auth.user.role);
 
   if (verifyExpJwtToken() === false) {
     window.location.replace("http://localhost:3000/");
   } else if (verifyExpJwtToken() === "Usuário não logado") {
     window.location.replace("http://localhost:3000/");
   }
+
+  const roleUser = verifyRole();
   
   const isAdmin = roleUser === "admin";
   const isEmpresaRh = roleUser === "empresa/rh";

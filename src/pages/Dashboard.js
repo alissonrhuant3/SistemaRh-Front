@@ -11,6 +11,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getFuncionarioProjetos, registerPontoFuncionario } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
+import { replace_url2 } from "../utils/base_url";
 
 let schema = Yup.object().shape({
   tarefa: Yup.string().required("Tarefa é obrigatório!"),
@@ -28,9 +29,9 @@ const Dashboard = () => {
   const {isSuccess, isLoading, isError, message} = authState;
 
   if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   }
 
   const showModal = () => {
@@ -39,7 +40,6 @@ const Dashboard = () => {
     setHour(moment().format("h:mm:ss A"));
   };
   const handleOk = () => {
-    alert("O Augusto quer ser Homem");
     setConfirmLoading(true);
     setTimeout(() => {
       setOpen(false);

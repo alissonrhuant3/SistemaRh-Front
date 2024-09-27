@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { createProjetos, deleteProjeto, getAllProjetos, resetState, updateAProjeto } from "../features/projetos/projetoSlice";
 import CustomModal from "../components/CustomModal";
 import { verifyExpJwtToken } from "../utils/axiosconfig";
+import { replace_url2 } from "../utils/base_url";
 
 let schema = Yup.object().shape({
   nome: Yup.string().required("Nome do projeto é obrigatório!"),
@@ -43,9 +44,9 @@ const columns = [
 const ListagemProjetos = () => {
 
   if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   }
 
   const [open, setOpen] = useState(false);

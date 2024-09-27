@@ -8,6 +8,7 @@ import { aprovacaoGestor, getApontamentosFuncionario, getFuncionario } from "../
 import moment from "moment";
 import { verifyExpJwtToken } from "../utils/axiosconfig";
 import { toast } from "react-toastify";
+import { replace_url } from "../utils/base_url";
 
 const Apontamentos = () => {
   
@@ -30,9 +31,9 @@ const Apontamentos = () => {
   }
 
   if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url);
   } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url);
   }
   
   useEffect(() => {

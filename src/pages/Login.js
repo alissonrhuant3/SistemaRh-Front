@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import { login } from "../features/auth/authSlice";
 import * as Yup from "yup";
 import { IMaskInput } from "react-imask";
+import { replace_url } from "../utils/base_url";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -21,7 +22,6 @@ const Login = () => {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values))
       dispatch(login(values));
     },
   });
@@ -31,13 +31,13 @@ const Login = () => {
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
-      window.location.replace("https://sitemahr.netlify.app/admin");
+      window.location.replace(replace_url);
     }
   }, []);
 
    useEffect(() => {
      if(isSuccess) {
-       window.location.replace("https://sitemahr.netlify.app/admin");
+       window.location.replace(replace_url);
      }
    },
    [user, isLoading, isError, isSuccess, message])

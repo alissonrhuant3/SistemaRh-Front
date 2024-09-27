@@ -18,6 +18,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import CustomModal from "../components/CustomModal";
 import { verifyExpJwtToken } from "../utils/axiosconfig";
+import { replace_url2 } from "../utils/base_url";
 
 let schema = Yup.object().shape({
   razaosocial: Yup.string().required("Razão Social da empresa é obrigatório!"),
@@ -72,9 +73,9 @@ const columns = [
 const ListagemEmpresas = () => {
 
   if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   }
 
   const [open, setOpen] = useState(false);

@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyExpJwtToken, verifyRole } from "../utils/axiosconfig";
 import CustomModal from "./CustomModal";
+import { replace_url2 } from "../utils/base_url";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -25,9 +26,9 @@ const MainLayout = () => {
   } = theme.useToken();
 
   if (verifyExpJwtToken() === false) {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   } else if (verifyExpJwtToken() === "Usuário não logado") {
-    window.location.replace("http://localhost:3000/");
+    window.location.replace(replace_url2);
   }
 
   const roleUser = verifyRole();

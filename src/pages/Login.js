@@ -31,13 +31,13 @@ const Login = () => {
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
-      window.location.replace("http://localhost:3000/admin");
+      window.location.replace("https://sitemahr.netlify.app/admin");
     }
   }, []);
 
    useEffect(() => {
      if(isSuccess) {
-       window.location.replace("http://localhost:3000/admin");
+       window.location.replace("https://sitemahr.netlify.app/admin");
      }
    },
    [user, isLoading, isError, isSuccess, message])

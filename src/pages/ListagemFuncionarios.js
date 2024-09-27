@@ -82,6 +82,8 @@ const ListagemFuncionarios = () => {
   const dispatch = useDispatch();
   const { role, nome } = useSelector((state) => state.auth.user);
   const funcionariosState = useSelector((state) => state.auth.funcionarios);
+  console.log(funcionariosState);
+  
   const authState = useSelector((state) => state.auth);
   const { isSuccess, isError, isLoading, message, createdFuncionario, updatedFuncionario, deletedFuncionario, assoc, desassoc } = authState;
   const projetosEmpresa = useSelector((state) => state.empresa.projetosEmpresa);
@@ -285,70 +287,70 @@ const ListagemFuncionarios = () => {
   for (let i = 0; i < funcionariosState?.length; i++) {
     data1.push({
       key: i + 1,
-      id: funcionariosState[i]._id,
-      idempresa: funcionariosState[i].cod_empresa._id,
-      nome: funcionariosState[i].nome,
-      cpf: funcionariosState[i].cpf,
-      rg: funcionariosState[i].rg,
-      data_nascimento: funcionariosState[i].data_nascimento,
-      data_admissao: funcionariosState[i].data_admissao,
-      endereco: funcionariosState[i].endereco,
-      complemento: funcionariosState[i].complemento,
-      bairro: funcionariosState[i].bairro,
-      cep: funcionariosState[i].cep,
-      cidade: funcionariosState[i].cidade,
-      uf: funcionariosState[i].uf,
+      id: funcionariosState[i]?._id,
+      idempresa: funcionariosState[i]?.cod_empresa?._id,
+      nome: funcionariosState[i]?.nome,
+      cpf: funcionariosState[i]?.cpf,
+      rg: funcionariosState[i]?.rg,
+      data_nascimento: funcionariosState[i]?.data_nascimento,
+      data_admissao: funcionariosState[i]?.data_admissao,
+      endereco: funcionariosState[i]?.endereco,
+      complemento: funcionariosState[i]?.complemento,
+      bairro: funcionariosState[i]?.bairro,
+      cep: funcionariosState[i]?.cep,
+      cidade: funcionariosState[i]?.cidade,
+      uf: funcionariosState[i]?.uf,
       telefone: funcionariosState[i].telefone,
-      email: funcionariosState[i].email,
-      valor_remuneracao: funcionariosState[i].valor_remuneracao,
-      valor_horaextra: funcionariosState[i].valor_horaextra,
-      nome_banco: funcionariosState[i].nome_banco,
-      agencia: funcionariosState[i].agencia,
-      conta: funcionariosState[i].conta,
-      tipo_conta: funcionariosState[i].tipo_conta,
-      pix: funcionariosState[i].pix,
-      horario1: funcionariosState[i].horario1,
-      horario2: funcionariosState[i].horario2,
-      numero_banco: funcionariosState[i].numero_banco,
-      observacoes: funcionariosState[i].observacoes,
-      empresa: funcionariosState[i].cod_empresa.razaosocial,
-      projetosvinculados: funcionariosState[i].projetosvinculados,
-      cod_gestor: funcionariosState[i].cod_gestor._id,
-      perfil: funcionariosState[i].perfil,
+      email: funcionariosState[i]?.email,
+      valor_remuneracao: funcionariosState[i]?.valor_remuneracao,
+      valor_horaextra: funcionariosState[i]?.valor_horaextra,
+      nome_banco: funcionariosState[i]?.nome_banco,
+      agencia: funcionariosState[i]?.agencia,
+      conta: funcionariosState[i]?.conta,
+      tipo_conta: funcionariosState[i]?.tipo_conta,
+      pix: funcionariosState[i]?.pix,
+      horario1: funcionariosState[i]?.horario1,
+      horario2: funcionariosState[i]?.horario2,
+      numero_banco: funcionariosState[i]?.numero_banco,
+      observacoes: funcionariosState[i]?.observacoes,
+      empresa: funcionariosState[i]?.cod_empresa.razaosocial,
+      projetosvinculados: funcionariosState[i]?.projetosvinculados,
+      cod_gestor: funcionariosState[i]?.cod_gestor?._id,
+      perfil: funcionariosState[i]?.perfil,
       acoes: (
         <>
           <button
             onClick={() =>
               showModal({
-                id: funcionariosState[i]._id,
-                idempresa: funcionariosState[i].cod_empresa._id,
-                nome: funcionariosState[i].nome,
-                cpf: funcionariosState[i].cpf,
-                rg: funcionariosState[i].rg,
-                data_nascimento: funcionariosState[i].data_nascimento,
-                data_admissao: funcionariosState[i].data_admissao,
-                endereco: funcionariosState[i].endereco,
-                complemento: funcionariosState[i].complemento,
-                bairro: funcionariosState[i].bairro,
-                cep: funcionariosState[i].cep,
-                cidade: funcionariosState[i].cidade,
-                uf: funcionariosState[i].uf,
-                telefone: funcionariosState[i].telefone,
-                email: funcionariosState[i].email,
-                valor_remuneracao: funcionariosState[i].valor_remuneracao,
-                valor_horaextra: funcionariosState[i].valor_horaextra,
-                nome_banco: funcionariosState[i].nome_banco,
-                agencia: funcionariosState[i].agencia,
-                conta: funcionariosState[i].conta,
-                tipo_conta: funcionariosState[i].tipo_conta,
-                pix: funcionariosState[i].pix,
-                horario1: funcionariosState[i].horario1,
-                horario2: funcionariosState[i].horario2,
-                numero_banco: funcionariosState[i].numero_banco,
-                observacoes: funcionariosState[i].observacoes,
-                empresa: funcionariosState[i].cod_empresa.razaosocial,
-                cod_gestor: funcionariosState[i].cod_gestor._id,
-                perfil: funcionariosState[i].perfil,
+                id: funcionariosState[i]?._id,
+                idempresa: funcionariosState[i]?.cod_empresa?._id,
+                nome: funcionariosState[i]?.nome,
+                cpf: funcionariosState[i]?.cpf,
+                rg: funcionariosState[i]?.rg,
+                data_nascimento: funcionariosState[i]?.data_nascimento,
+                data_admissao: funcionariosState[i]?.data_admissao,
+                endereco: funcionariosState[i]?.endereco,
+                complemento: funcionariosState[i]?.complemento,
+                bairro: funcionariosState[i]?.bairro,
+                cep: funcionariosState[i]?.cep,
+                cidade: funcionariosState[i]?.cidade,
+                uf: funcionariosState[i]?.uf,
+                telefone: funcionariosState[i]?.telefone,
+                email: funcionariosState[i]?.email,
+                valor_remuneracao: funcionariosState[i]?.valor_remuneracao,
+                valor_horaextra: funcionariosState[i]?.valor_horaextra,
+                nome_banco: funcionariosState[i]?.nome_banco,
+                agencia: funcionariosState[i]?.agencia,
+                conta: funcionariosState[i]?.conta,
+                tipo_conta: funcionariosState[i]?.tipo_conta,
+                pix: funcionariosState[i]?.pix,
+                horario1: funcionariosState[i]?.horario1,
+                horario2: funcionariosState[i]?.horario2,
+                numero_banco: funcionariosState[i]?.numero_banco,
+                observacoes: funcionariosState[i]?.observacoes,
+                empresa: funcionariosState[i]?.cod_empresa.razaosocial,
+                cod_gestor: funcionariosState[i]?.cod_gestor?._id,
+                perfil: funcionariosState[i]?.perfil,
               })
             }
             className="bg-transparent border-0 text-blue"
@@ -359,15 +361,15 @@ const ListagemFuncionarios = () => {
             className="bg-transparent border-0 text-blue"
             onClick={() =>
               showModalAssoc({
-                nome: funcionariosState[i].nome,
-                id: funcionariosState[i]._id,
-                projetosvinculados: funcionariosState[i].projetosvinculados,
+                nome: funcionariosState[i]?.nome,
+                id: funcionariosState[i]?._id,
+                projetosvinculados: funcionariosState[i]?.projetosvinculados,
               })
             }
           >
             <HiViewGridAdd className="fs-5" />
           </button>
-          <button onClick={() => showModalConfirm(funcionariosState[i]._id)} className="bg-transparent border-0 text-danger">
+          <button onClick={() => showModalConfirm(funcionariosState[i]?._id)} className="bg-transparent border-0 text-danger">
             <AiFillDelete className="fs-5" />
           </button>
         </>
